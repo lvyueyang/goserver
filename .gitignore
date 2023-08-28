@@ -12,4 +12,6 @@ main.exe
 temp/
 temp.yaml
 bin
-logs/**
+logs/request/*
+logs/app/*
+
