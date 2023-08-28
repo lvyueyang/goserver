@@ -10,7 +10,5 @@ func CreateHome(r *gin.Engine) {
 }
 
 func get(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Hello World",
-	})
+	c.String(http.StatusOK, "Hello go Gin")
 }
