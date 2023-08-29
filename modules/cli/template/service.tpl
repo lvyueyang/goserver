@@ -1,4 +1,4 @@
-package cli
+package {{.Name}}
 
 type Service struct{}
 
@@ -8,6 +8,5 @@ func init() {
 	ServiceInstance = Service{}
 }
 
-func (s *Service) GetList() []string {
-	return []string{"1", "2", "3"}
+func (s *Service) GetList() {
 }

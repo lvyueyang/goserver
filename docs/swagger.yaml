@@ -1,7 +1,14 @@
-basePath: /api
+definitions:
+  jsonutil.ResponseData:
+    properties:
+      code:
+        type: integer
+      data: {}
+      msg:
+        type: string
+    type: object
 info:
   contact: {}
-  description: 基于 go gin 框架的 API 接口文档
   title: 男生自用 API 接口文档
   version: "1.0"
 paths:
@@ -11,19 +18,38 @@ paths:
       - application/json
       description: get string by ID
       parameters:
-      - description: Account ID
+      - description: 模块名称
         in: query
-        name: id
+        name: name
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: res
           schema:
-            type: string
+            allOf:
+            - $ref: '#/definitions/jsonutil.ResponseData'
+            - properties:
+                data:
+                  type: boolean
+              type: object
       summary: 创建模块
       tags:
       - cli
+  /api/user/list:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: res
+          schema:
+            $ref: '#/definitions/jsonutil.ResponseData'
+      summary: 用户列表
+      tags:
+      - user
 swagger: "2.0"
