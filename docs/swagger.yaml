@@ -1,0 +1,29 @@
+basePath: /api
+info:
+  contact: {}
+  description: 基于 go gin 框架的 API 接口文档
+  title: 男生自用 API 接口文档
+  version: "1.0"
+paths:
+  /api/cli/module/create:
+    get:
+      consumes:
+      - application/json
+      description: get string by ID
+      parameters:
+      - description: Account ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 创建模块
+      tags:
+      - cli
+swagger: "2.0"

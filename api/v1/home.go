@@ -3,12 +3,24 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"selfserver/service"
 )
 
 func CreateHome(r *gin.Engine) {
-	r.GET("/", get)
+	controller := useHomeController()
+	r.GET("/", controller.get)
 }
 
-func get(c *gin.Context) {
-	c.String(http.StatusOK, "Hello go Gin")
+type HomeController struct {
+	service service.HomeService
+}
+
+func useHomeController() HomeController {
+	return HomeController{
+		service: service.HomeServiceInstance,
+	}
+}
+
+func (c *HomeController) get(ctx *gin.Context) {
+	ctx.String(http.StatusOK, c.service.GetInfo())
 }

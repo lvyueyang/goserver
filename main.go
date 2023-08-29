@@ -12,11 +12,18 @@ import (
 	"time"
 
 	_ "selfserver/config"
+	_ "selfserver/docs"
 )
 
+// @title		男生自用 API 接口文档
+// @version		1.0
 func main() {
 	// 配置
 	config.Run()
+
+	if config.Config.IsProd {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	// 日志
 	gin.DisableConsoleColor()

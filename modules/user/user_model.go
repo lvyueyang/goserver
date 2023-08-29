@@ -1,4 +1,4 @@
-package model
+package user
 
 import "gorm.io/gorm"
 
@@ -7,5 +7,4 @@ type User struct {
 	Name  string `gorm:"unique"`
 	Email string `gorm:"unique"`
 	Sex   uint8
-	Role  []Role
 }

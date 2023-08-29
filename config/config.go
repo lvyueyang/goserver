@@ -28,8 +28,8 @@ func Run() {
 		panic("配置文件不存在")
 	}
 
-	Config.IsDev = viper.Get("ENV") == consts.EnvDev
-	Config.IsProd = viper.Get("ENV") == consts.EnvDev
+	Config.IsDev = viper.GetString("ENV") == string(consts.EnvDev)
+	Config.IsProd = viper.GetString("ENV") == string(consts.EnvDev)
 	Config.Port = viper.GetInt("PORT")
 
 	fmt.Println("配置文件加载成功", Config)
@@ -38,5 +38,5 @@ func Run() {
 	if Config.IsProd {
 		envName = utils.EnumLabel(consts.EnvProd)
 	}
-	fmt.Println("当前环境：", envName)
+	fmt.Println("当前环境：", envName, Config.IsDev)
 }
