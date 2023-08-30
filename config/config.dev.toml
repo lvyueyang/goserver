@@ -2,8 +2,8 @@
 env = "development"
 
 # 端口
-port = 4003
+port = 4002
 
 # 日志
 [log]
-output = "logs"
+output = "/Users/lyy/code/project/goserver/logs"

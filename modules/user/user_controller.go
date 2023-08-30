@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"selfserver/utils/jsonutil"
 )
@@ -48,7 +49,7 @@ type CreateUserBody struct {
 //	@Router		/api/user/create [post]
 func (c *Controller) Create(ctx *gin.Context) {
 	var body CreateUserBody
-	ctx.ShouldBindJSON(&body)
+	ctx.ShouldBindBodyWith(&body, binding.JSON)
 	fmt.Printf("Create: %+v\n", body)
 	ctx.JSON(http.StatusOK, jsonutil.SuccessResponse(nil, "success"))
 }

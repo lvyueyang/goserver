@@ -7,6 +7,5 @@ main
 temp/
 temp.yaml
 bin
-logs/request/*.log
-logs/app/*.log
+logs/**/*.log
 goserver*

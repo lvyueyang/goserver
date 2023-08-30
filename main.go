@@ -7,7 +7,8 @@ import (
 	"selfserver/config"
 	_ "selfserver/config"
 	_ "selfserver/docs"
-	"selfserver/middleware/logger"
+	"selfserver/lib/logger"
+	"selfserver/middleware"
 	"selfserver/modules/swagger"
 	"strconv"
 )
@@ -15,6 +16,10 @@ import (
 // @title		男生自用 API 接口文档
 // @version	1.0
 func main() {
+	// 日志
+	logger.InitLogger()
+	defer logger.Logger.Sync()
+
 	// swagger
 	swagger.RunCmd()
 
@@ -25,16 +30,10 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// 日志
-	//gin.DisableConsoleColor()
-	//now := time.Now()
-	//f, _ := os.Create(path.Join("logs/request", now.Format("2006-01-02")+".log"))
-	//gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
-
 	// gin
 	router := gin.New()
 	// 全局中间件
-	router.Use(logger.Logger(), gin.Recovery())
+	router.Use(middleware.Logger(), gin.Recovery())
 
 	// 启动
 	app.Run(router)
