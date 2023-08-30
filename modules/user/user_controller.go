@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"selfserver/utils/jsonutil"
@@ -16,6 +17,7 @@ func Register(e *gin.Engine) {
 		service: ServiceInstance,
 	}
 	router.GET("/list", controller.FindList)
+	router.POST("/create", controller.Create)
 }
 
 // FindList godoc
@@ -24,9 +26,29 @@ func Register(e *gin.Engine) {
 //	@Tags		user
 //	@Accept		json
 //	@Produce	json
-//	@Success	200	{object}	jsonutil.ResponseData{data=[]user.User}	"res"
+//	@Success	200	{object}	string	"res"
 //	@Router		/api/user/list [get]
 func (c *Controller) FindList(ctx *gin.Context) {
 	list := c.service.GetList()
 	ctx.JSON(http.StatusOK, jsonutil.SuccessResponse(list, "success"))
+}
+
+type CreateUserBody struct {
+	Name string `json:"name"`
+}
+
+// Create godoc
+//
+//	@Summary	创建用户
+//	@Tags		user
+//	@Accept		json
+//	@Produce	json
+//	@Param		name	body		CreateUserBody	true	"ID"
+//	@Success	200		{object}	nil	"res"
+//	@Router		/api/user/create [post]
+func (c *Controller) Create(ctx *gin.Context) {
+	var body CreateUserBody
+	ctx.ShouldBindJSON(&body)
+	fmt.Printf("Create: %+v\n", body)
+	ctx.JSON(http.StatusOK, jsonutil.SuccessResponse(nil, "success"))
 }

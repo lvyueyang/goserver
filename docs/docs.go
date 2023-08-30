@@ -60,6 +60,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/user/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "创建用户",
+                "parameters": [
+                    {
+                        "description": "ID",
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.CreateUserBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "res"
+                    }
+                }
+            }
+        },
         "/api/user/list": {
             "get": {
                 "consumes": [
@@ -76,7 +106,7 @@ const docTemplate = `{
                     "200": {
                         "description": "res",
                         "schema": {
-                            "$ref": "#/definitions/jsonutil.ResponseData"
+                            "type": "string"
                         }
                     }
                 }
@@ -92,6 +122,14 @@ const docTemplate = `{
                 },
                 "data": {},
                 "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.CreateUserBody": {
+            "type": "object",
+            "properties": {
+                "name": {
                     "type": "string"
                 }
             }

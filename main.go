@@ -3,21 +3,21 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"io"
-	"os"
-	"path"
 	"selfserver/app"
 	"selfserver/config"
-	"strconv"
-	"time"
-
 	_ "selfserver/config"
 	_ "selfserver/docs"
+	"selfserver/middleware/logger"
+	"selfserver/modules/swagger"
+	"strconv"
 )
 
-//	@title		男生自用 API 接口文档
-//	@version	1.0
+// @title		男生自用 API 接口文档
+// @version	1.0
 func main() {
+	// swagger
+	swagger.RunCmd()
+
 	// 配置
 	config.Run()
 
@@ -26,13 +26,15 @@ func main() {
 	}
 
 	// 日志
-	gin.DisableConsoleColor()
-	now := time.Now()
-	f, _ := os.Create(path.Join("logs/request", now.Format("2006-01-02")+".log"))
-	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+	//gin.DisableConsoleColor()
+	//now := time.Now()
+	//f, _ := os.Create(path.Join("logs/request", now.Format("2006-01-02")+".log"))
+	//gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 
 	// gin
-	router := gin.Default()
+	router := gin.New()
+	// 全局中间件
+	router.Use(logger.Logger(), gin.Recovery())
 
 	// 启动
 	app.Run(router)

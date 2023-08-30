@@ -7,6 +7,11 @@ definitions:
       msg:
         type: string
     type: object
+  user.CreateUserBody:
+    properties:
+      name:
+        type: string
+    type: object
 info:
   contact: {}
   title: 男生自用 API 接口文档
@@ -38,6 +43,25 @@ paths:
       summary: 创建模块
       tags:
       - cli
+  /api/user/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: body
+        name: name
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateUserBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: res
+      summary: 创建用户
+      tags:
+      - user
   /api/user/list:
     get:
       consumes:
@@ -48,7 +72,7 @@ paths:
         "200":
           description: res
           schema:
-            $ref: '#/definitions/jsonutil.ResponseData'
+            type: string
       summary: 用户列表
       tags:
       - user

@@ -8,9 +8,10 @@ import (
 )
 
 type Result struct {
-	IsDev  bool //  是否是开发环境
-	IsProd bool //  是否是生产环境
-	Port   int  // 	端口
+	Env    string //  环境
+	IsDev  bool   //  是否是开发环境
+	IsProd bool   //  是否是生产环境
+	Port   int    //  端口
 }
 
 var Config Result
@@ -28,11 +29,13 @@ func Run() {
 		panic("配置文件不存在")
 	}
 
-	Config.IsDev = viper.GetString("ENV") == string(consts.EnvDev)
-	Config.IsProd = viper.GetString("ENV") == string(consts.EnvDev)
-	Config.Port = viper.GetInt("PORT")
+	viper.Unmarshal(&Config)
+	viper.WatchConfig()
 
-	fmt.Println("配置文件加载成功", Config)
+	Config.IsDev = Config.Env == string(consts.EnvDev)
+	Config.IsProd = Config.Env == string(consts.EnvProd)
+
+	fmt.Printf("配置文件加载成功 %+v\n", Config)
 
 	var envName = utils.EnumLabel(consts.EnvDev)
 	if Config.IsProd {

@@ -1,5 +1,9 @@
 # 运行环境
-ENV = "development"
+env = "development"
 
 # 端口
-PORT = 4003
+port = 4003
+
+# 日志
+[log]
+output = "logs"
