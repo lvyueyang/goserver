@@ -2,16 +2,24 @@ package config
 
 import (
 	"fmt"
+	"github.com/duke-git/lancet/v2/fileutil"
 	"github.com/spf13/viper"
+	"path"
 	"selfserver/consts"
+	"selfserver/lib/console"
 	"selfserver/utils"
 )
 
+type LogConfig struct {
+	Output string // 日志路径
+}
+
 type Result struct {
-	Env    string //  环境
-	IsDev  bool   //  是否是开发环境
-	IsProd bool   //  是否是生产环境
-	Port   int    //  端口
+	Env    string    //  环境
+	IsDev  bool      //  是否是开发环境
+	IsProd bool      //  是否是生产环境
+	Port   int       //  端口
+	Log    LogConfig // 日志
 }
 
 var Config Result
@@ -35,11 +43,21 @@ func Run() {
 	Config.IsDev = Config.Env == string(consts.EnvDev)
 	Config.IsProd = Config.Env == string(consts.EnvProd)
 
-	fmt.Printf("配置文件加载成功 %+v\n", Config)
-
 	var envName = utils.EnumLabel(consts.EnvDev)
 	if Config.IsProd {
 		envName = utils.EnumLabel(consts.EnvProd)
 	}
-	fmt.Println("当前环境：", envName, Config.IsDev)
+
+	console.Success("配置文件加载成功")
+	fmt.Printf("%+v\n", Config)
+	console.Success("当前环境：", envName)
+}
+
+// GetLoggerOutPutPath 获取日志输出路径
+func GetLoggerOutPutPath() string {
+	if Config.IsProd {
+		return Config.Log.Output
+	}
+	cPath := fileutil.CurrentPath()
+	return path.Join(cPath, "../logs")
 }

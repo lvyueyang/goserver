@@ -7,7 +7,8 @@ import (
 	"selfserver/config"
 	_ "selfserver/config"
 	_ "selfserver/docs"
-	"selfserver/lib/logger"
+	"selfserver/lib/logs"
+	"selfserver/lib/validate"
 	"selfserver/middleware"
 	"selfserver/modules/swagger"
 	"strconv"
@@ -16,15 +17,14 @@ import (
 // @title		男生自用 API 接口文档
 // @version	1.0
 func main() {
+	// 配置
+	config.Run()
+
 	// 日志
-	logger.InitLogger()
-	defer logger.Logger.Sync()
+	logs.InitLogger()
 
 	// swagger
 	swagger.RunCmd()
-
-	// 配置
-	config.Run()
 
 	if config.Config.IsProd {
 		gin.SetMode(gin.ReleaseMode)
@@ -33,10 +33,13 @@ func main() {
 	// gin
 	router := gin.New()
 	// 全局中间件
-	router.Use(middleware.Logger(), gin.Recovery())
+	router.Use(middleware.RequestLogger(), gin.Recovery())
 
 	// 启动
 	app.Run(router)
+
+	// 验证器
+	validate.InitValidate()
 
 	fmt.Println("http://127.0.0.1:" + strconv.Itoa(config.Config.Port))
 	fmt.Println("swagger: ", "http://127.0.0.1:"+strconv.Itoa(config.Config.Port)+"/swagger/index.html")

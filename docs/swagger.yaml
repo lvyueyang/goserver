@@ -1,5 +1,11 @@
 definitions:
-  jsonutil.ResponseData:
+  cli.CreateModuleBody:
+    properties:
+      name:
+        description: 模块名称
+        type: string
+    type: object
+  resp.Result:
     properties:
       code:
         type: integer
@@ -7,10 +13,12 @@ definitions:
       msg:
         type: string
     type: object
-  user.CreateUserBody:
+  user.CreateUserBodyDto:
     properties:
       name:
         type: string
+    required:
+    - name
     type: object
 info:
   contact: {}
@@ -18,27 +26,37 @@ info:
   version: "1.0"
 paths:
   /api/cli/module/create:
-    get:
+    post:
       consumes:
       - application/json
       description: get string by ID
       parameters:
       - description: 模块名称
-        in: query
-        name: name
+        in: body
+        name: data
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/cli.CreateModuleBody'
       produces:
       - application/json
       responses:
         "200":
-          description: res
+          description: resp
           schema:
             allOf:
-            - $ref: '#/definitions/jsonutil.ResponseData'
+            - $ref: '#/definitions/resp.Result'
             - properties:
                 data:
                   type: boolean
+              type: object
+        "500":
+          description: resp
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  type: string
               type: object
       summary: 创建模块
       tags:
@@ -53,12 +71,12 @@ paths:
         name: name
         required: true
         schema:
-          $ref: '#/definitions/user.CreateUserBody'
+          $ref: '#/definitions/user.CreateUserBodyDto'
       produces:
       - application/json
       responses:
         "200":
-          description: res
+          description: resp
       summary: 创建用户
       tags:
       - user
@@ -70,7 +88,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: res
+          description: resp
           schema:
             type: string
       summary: 用户列表

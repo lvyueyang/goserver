@@ -1,15 +1,30 @@
 package middleware
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"go.uber.org/zap"
 	"net/http"
-	"selfserver/lib/logger"
+	"selfserver/lib/logs"
 	"strings"
 	"time"
 )
+
+// 自定义一个结构体，实现 gin.ResponseWriter interface
+type responseWriter struct {
+	gin.ResponseWriter
+	b *bytes.Buffer
+}
+
+// 重写 Write([]byte) (int, error) 方法
+func (w responseWriter) Write(b []byte) (int, error) {
+	//向一个bytes.buffer中写一份数据来为获取body使用
+	w.b.Write(b)
+	//完成gin.Context.Writer.Write()原有功能
+	return w.ResponseWriter.Write(b)
+}
 
 type LoggerFormatterParams struct {
 	Request      *http.Request
@@ -21,12 +36,13 @@ type LoggerFormatterParams struct {
 	Path         string         // 客户端请求的路径
 	ErrorMessage string         // 在处理请求时发生的错误消息
 	ResponseSize int            // 响应体的大小
+	Response     string         // 响应体数据
 	Query        string         // Query 请求参数
 	Body         string         // Body 请求参数
 	Keys         map[string]any // 在请求的上下文中设置的键值对
 }
 
-func Logger() gin.HandlerFunc {
+func RequestLogger() gin.HandlerFunc {
 	return loggerMiddleware()
 }
 
@@ -34,7 +50,13 @@ func loggerMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 开始时间
 		start := time.Now()
-		var bodyJson = body2string(c)
+		bodyJson := body2string(c)
+
+		writer := responseWriter{
+			c.Writer,
+			bytes.NewBuffer([]byte{}),
+		}
+		c.Writer = writer
 
 		c.Next()
 
@@ -45,6 +67,7 @@ func loggerMiddleware() gin.HandlerFunc {
 			Method:       c.Request.Method,
 			StatusCode:   c.Writer.Status(),
 			ResponseSize: c.Writer.Size(),
+			Response:     writer.b.String(),
 			Path:         c.Request.URL.Path,
 			Query:        c.Request.URL.RawQuery,
 			Body:         bodyJson,
@@ -57,34 +80,37 @@ func loggerMiddleware() gin.HandlerFunc {
 		param.ErrorMessage = c.Errors.ByType(gin.ErrorTypePrivate).String()
 
 		// Path 是 /api 开头的
-		if strings.HasPrefix(param.Path, "/api") && param.Method == "POST" {
+		if strings.HasPrefix(param.Path, "/api") {
 			if param.StatusCode == http.StatusOK {
-				logger.Logger.Infow("RequestSuccess",
-					zap.String("path", param.Path),
-					zap.String("method", param.Method),
-					zap.String("ip", param.ClientIP),
-					zap.Duration("duration", param.Duration),
-					zap.Time("timeStamp", param.TimeStamp),
-					zap.Int("status", param.StatusCode),
-					zap.Int("responseSize", param.ResponseSize),
-					zap.String("body", param.Body),
-					zap.String("query", param.Query),
-				)
-			} else {
-				logger.Logger.Errorw("RequestFail",
-					zap.String("path", param.Path),
-					zap.String("method", param.Method),
-					zap.String("ip", param.ClientIP),
-					zap.Duration("duration", param.Duration),
-					zap.Time("timeStamp", param.TimeStamp),
-					zap.Int("status", param.StatusCode),
-					zap.Int("responseSize", param.ResponseSize),
-					zap.String("body", param.Body),
-					zap.String("query", param.Query),
-					zap.String("error", param.ErrorMessage),
-				)
-			}
+				fmt.Println("请求成功", param.Path)
+				logs.Info().
+					Str("path", param.Path).
+					Str("method", param.Method).
+					Str("ip", param.ClientIP).
+					Dur("duration", param.Duration).
+					Time("timeStamp", param.TimeStamp).
+					Int("status", param.StatusCode).
+					Int("responseSize", param.ResponseSize).
+					Str("response", param.Response).
+					Str("body", param.Body).
+					Str("query", param.Query).
+					Msg("RequestSuccess")
 
+			} else {
+				logs.Err().
+					Str("path", param.Path).
+					Str("method", param.Method).
+					Str("ip", param.ClientIP).
+					Dur("duration", param.Duration).
+					Time("timeStamp", param.TimeStamp).
+					Int("status", param.StatusCode).
+					Int("responseSize", param.ResponseSize).
+					Str("response", param.Response).
+					Str("body", param.Body).
+					Str("error", param.ErrorMessage).
+					Str("query", param.Query).
+					Msg("RequestSuccess")
+			}
 		}
 	}
 }

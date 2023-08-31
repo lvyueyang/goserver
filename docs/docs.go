@@ -17,7 +17,7 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/cli/module/create": {
-            "get": {
+            "post": {
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"
@@ -31,26 +31,46 @@ const docTemplate = `{
                 "summary": "创建模块",
                 "parameters": [
                     {
-                        "type": "string",
                         "description": "模块名称",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/cli.CreateModuleBody"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "res",
+                        "description": "resp",
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/jsonutil.ResponseData"
+                                    "$ref": "#/definitions/resp.Result"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
                                             "type": "boolean"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "resp",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resp.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
                                         }
                                     }
                                 }
@@ -79,13 +99,13 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.CreateUserBody"
+                            "$ref": "#/definitions/user.CreateUserBodyDto"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "res"
+                        "description": "resp"
                     }
                 }
             }
@@ -104,7 +124,7 @@ const docTemplate = `{
                 "summary": "用户列表",
                 "responses": {
                     "200": {
-                        "description": "res",
+                        "description": "resp",
                         "schema": {
                             "type": "string"
                         }
@@ -114,7 +134,16 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "jsonutil.ResponseData": {
+        "cli.CreateModuleBody": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "模块名称",
+                    "type": "string"
+                }
+            }
+        },
+        "resp.Result": {
             "type": "object",
             "properties": {
                 "code": {
@@ -126,8 +155,11 @@ const docTemplate = `{
                 }
             }
         },
-        "user.CreateUserBody": {
+        "user.CreateUserBodyDto": {
             "type": "object",
+            "required": [
+                "name"
+            ],
             "properties": {
                 "name": {
                     "type": "string"

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"selfserver/config"
+	"selfserver/lib/console"
 )
 
 func Register(r *gin.Engine) {
@@ -16,14 +17,16 @@ func Register(r *gin.Engine) {
 
 func RunCmd() {
 	if config.Config.IsDev {
-		fmt.Println("---------swagger 文档生成-------------------")
+		console.Success("swagger 文档生成")
 		cmd := exec.Command("swag", "init")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err := cmd.Run()
 		if err != nil {
 			fmt.Println("err:", err)
+			console.Err("swagger 文档生成失败")
+			return
 		}
-		fmt.Println("---------END -------------------")
+		console.Success("swagger 文档生成成功")
 	}
 }
