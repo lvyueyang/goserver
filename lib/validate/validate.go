@@ -11,7 +11,7 @@ import (
 	enTranslations "github.com/go-playground/validator/v10/translations/en"
 	zhTranslations "github.com/go-playground/validator/v10/translations/zh"
 	"reflect"
-	"selfserver/lib/logs"
+	"server/lib/logs"
 	"strings"
 )
 

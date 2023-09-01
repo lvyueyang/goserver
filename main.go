@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"selfserver/app"
-	"selfserver/config"
-	_ "selfserver/config"
-	_ "selfserver/docs"
-	"selfserver/lib/logs"
-	"selfserver/lib/validate"
-	"selfserver/middleware"
+	"server/app"
+	"server/config"
+	_ "server/config"
+	_ "server/docs"
+	"server/lib/logs"
+	"server/lib/validate"
+	"server/middleware"
 	"strconv"
 )
 

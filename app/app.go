@@ -2,10 +2,10 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
-	"selfserver/modules/cli"
-	"selfserver/modules/home"
-	"selfserver/modules/swagger"
-	"selfserver/modules/user"
+	"server/modules/cli"
+	"server/modules/home"
+	"server/modules/swagger"
+	"server/modules/user"
 )
 
 type Application struct {

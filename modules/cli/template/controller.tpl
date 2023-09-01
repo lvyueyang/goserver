@@ -3,7 +3,7 @@ package {{.Name}}
 import (
     "github.com/gin-gonic/gin"
     "net/http"
-    "selfserver/utils/jsonutil"
+    "server/utils/jsonutil"
 )
 
 type Controller struct {

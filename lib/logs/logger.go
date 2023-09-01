@@ -5,8 +5,8 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
 	"path"
-	"selfserver/config"
-	"selfserver/lib/console"
+	"server/config"
+	"server/lib/console"
 )
 
 var fileLogger zerolog.Logger

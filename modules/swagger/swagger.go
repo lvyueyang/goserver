@@ -7,8 +7,8 @@ import (
 	"github.com/swaggo/gin-swagger"
 	"os"
 	"os/exec"
-	"selfserver/config"
-	"selfserver/lib/console"
+	"server/config"
+	"server/lib/console"
 )
 
 func Register(r *gin.Engine) {

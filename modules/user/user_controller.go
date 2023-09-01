@@ -3,8 +3,8 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"selfserver/lib/validate"
-	"selfserver/utils/resp"
+	"server/lib/validate"
+	"server/utils/resp"
 )
 
 type Controller struct {

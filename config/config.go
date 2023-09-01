@@ -5,9 +5,9 @@ import (
 	"github.com/duke-git/lancet/v2/fileutil"
 	"github.com/spf13/viper"
 	"path"
-	"selfserver/consts"
-	"selfserver/lib/console"
-	"selfserver/utils"
+	"server/consts"
+	"server/lib/console"
+	"server/utils"
 )
 
 type LogConfig struct {

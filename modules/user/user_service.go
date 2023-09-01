@@ -2,7 +2,7 @@ package user
 
 import (
 	"gorm.io/gorm"
-	"selfserver/db"
+	"server/db"
 )
 
 type Service struct {

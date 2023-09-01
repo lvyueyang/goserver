@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"selfserver/config"
-	"selfserver/utils/resp"
+	"server/config"
+	"server/utils/resp"
 )
 
 type Controller struct {
