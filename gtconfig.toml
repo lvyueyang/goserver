@@ -1,1 +1,10 @@
-IgnoreDirs = [".git", ".idea"]
+IgnoreDirs = [".git", ".idea", "docs", "logs"]
+
+IgnoreFiles = ["server"]
+
+runs = [
+    "swag init",
+    "killall server",
+    "go build -o server",
+    "./server"
+]

@@ -39,8 +39,8 @@ func (c *Controller) FindList(ctx *gin.Context) {
 //	@Tags		user
 //	@Accept		json
 //	@Produce	json
-//	@Param		req	body			CreateUserBodyDto	true "body"
-//	@Success	200	{object}	nil	"resp"
+//	@Param		req	body		CreateUserBodyDto	true	"body"
+//	@Success	200	{object}	nil					"resp"
 //	@Router		/api/user/create [post]
 func (c *Controller) Create(ctx *gin.Context) {
 	var body CreateUserBodyDto

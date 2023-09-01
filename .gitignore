@@ -8,4 +8,4 @@ temp/
 temp.yaml
 bin
 logs/**/*.log
-goserver*
+server*
