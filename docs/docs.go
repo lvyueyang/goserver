@@ -94,8 +94,8 @@ const docTemplate = `{
                 "summary": "创建用户",
                 "parameters": [
                     {
-                        "description": "ID",
-                        "name": "name",
+                        "description": "body",
+                        "name": "req",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -158,10 +158,16 @@ const docTemplate = `{
         "user.CreateUserBodyDto": {
             "type": "object",
             "required": [
-                "name"
+                "name",
+                "sex"
             ],
             "properties": {
                 "name": {
+                    "description": "姓名",
+                    "type": "string"
+                },
+                "sex": {
+                    "description": "性别",
                     "type": "string"
                 }
             }

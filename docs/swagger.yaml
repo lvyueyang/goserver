@@ -16,9 +16,14 @@ definitions:
   user.CreateUserBodyDto:
     properties:
       name:
+        description: 姓名
+        type: string
+      sex:
+        description: 性别
         type: string
     required:
     - name
+    - sex
     type: object
 info:
   contact: {}
@@ -66,9 +71,9 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: ID
+      - description: body
         in: body
-        name: name
+        name: req
         required: true
         schema:
           $ref: '#/definitions/user.CreateUserBodyDto'

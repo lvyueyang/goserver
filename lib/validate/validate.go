@@ -10,7 +10,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	enTranslations "github.com/go-playground/validator/v10/translations/en"
 	zhTranslations "github.com/go-playground/validator/v10/translations/zh"
+	"reflect"
 	"selfserver/lib/logs"
+	"strings"
 )
 
 func InitValidate() {
@@ -22,7 +24,6 @@ func InitValidate() {
 
 var (
 	uni   *ut.UniversalTranslator
-	v     *validator.Validate
 	trans ut.Translator
 )
 
@@ -38,6 +39,9 @@ func transInit(local string) (err error) {
 		if !o {
 			return errors.New("translator init failed")
 		}
+
+		// 自定义标签
+		v.RegisterTagNameFunc(customTagNameFunc)
 
 		switch local {
 		case "zh":
@@ -61,10 +65,27 @@ func ErrTransform(err error) string {
 		return err.Error()
 	}
 	// validator.ValidationErrors 类型错误则进行翻译
-	msg := ""
-	for _, value := range errs.Translate(trans) {
-		msg = msg + value + ";"
+	builder := strings.Builder{}
+	ind := 0
+	transMap := errs.Translate(trans)
+	transMapLen := len(transMap)
+	for _, value := range transMap {
+		ind++
+		builder.WriteString(value)
+		if ind < transMapLen {
+			builder.WriteString(", ")
+		}
 	}
-	return msg
+	return builder.String()
 
+}
+
+// customTagNameFunc 自定义标签名称
+func customTagNameFunc(field reflect.StructField) string {
+	// 可以根据 label 展示
+	label := field.Tag.Get("label")
+	if len(label) == 0 {
+		return field.Name
+	}
+	return label
 }

@@ -10,7 +10,6 @@ import (
 	"selfserver/lib/logs"
 	"selfserver/lib/validate"
 	"selfserver/middleware"
-	"selfserver/modules/swagger"
 	"strconv"
 )
 
@@ -24,7 +23,7 @@ func main() {
 	logs.InitLogger()
 
 	// swagger
-	swagger.RunCmd()
+	//swagger.RunCmd()
 
 	if config.Config.IsProd {
 		gin.SetMode(gin.ReleaseMode)
