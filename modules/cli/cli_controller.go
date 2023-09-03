@@ -5,16 +5,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"server/config"
+	"server/lib/types"
 	"server/utils/resp"
 )
 
 type Controller struct {
-	service Service
+	service *Service
 }
 
-func Register(e *gin.Engine) {
+var New types.Controller = func(e *gin.Engine) {
 	router := e.Group("/api/cli")
-	controller := Controller{
+	controller := &Controller{
 		service: ServiceInstance,
 	}
 	fmt.Println("DEV", config.Config.IsDev)

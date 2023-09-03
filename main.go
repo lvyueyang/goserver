@@ -13,17 +13,14 @@ import (
 	"strconv"
 )
 
-//	@title		男生自用 API 接口文档
-//	@version	1.0
+// @title		男生自用 API 接口文档
+// @version	1.0
 func main() {
 	// 配置
 	config.Run()
 
 	// 日志
 	logs.InitLogger()
-
-	// swagger
-	//swagger.RunCmd()
 
 	if config.Config.IsProd {
 		gin.SetMode(gin.ReleaseMode)

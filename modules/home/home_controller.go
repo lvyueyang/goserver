@@ -9,7 +9,7 @@ type Controller struct {
 	service Service
 }
 
-func Register(e *gin.Engine) {
+func New(e *gin.Engine) {
 	router := e.Group("/")
 	controller := Controller{
 		service: ServiceInstance,

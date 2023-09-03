@@ -8,17 +8,15 @@ import (
 	"server/modules/user"
 )
 
-type Application struct {
+var modules = []func(e *gin.Engine){
+	cli.New,
+	swagger.New,
+	user.New,
+	home.New,
 }
 
-var App Application
-
 func Run(r *gin.Engine) {
-	// 数据库链接
-
-	cli.Register(r)
-	swagger.Register(r)
-
-	home.Register(r)
-	user.Register(r)
+	for _, module := range modules {
+		module(r)
+	}
 }

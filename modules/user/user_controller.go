@@ -11,7 +11,7 @@ type Controller struct {
 	service Service
 }
 
-func Register(e *gin.Engine) {
+func New(e *gin.Engine) {
 	router := e.Group("/api/user")
 	controller := Controller{
 		service: ServiceInstance,
