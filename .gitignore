@@ -9,3 +9,4 @@ temp.yaml
 bin
 logs/**/*.log
 server*
+goserver*

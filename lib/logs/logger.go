@@ -38,14 +38,14 @@ func createFileLog() zerolog.Logger {
 
 // 控制台日志
 func createStdLog() zerolog.Logger {
-	logger := zerolog.New(os.Stderr)
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr})
 	return logger
 }
 
 // Debug 打印调试信息
 // 仅在开发环境的控制台输出调试信息
 func Debug() *zerolog.Event {
-	return stdLogger.Debug()
+	return stdLogger.Info()
 }
 
 func Info() *zerolog.Event {

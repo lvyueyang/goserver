@@ -2,18 +2,22 @@ package cli
 
 import (
 	"errors"
-	"fmt"
 	"github.com/duke-git/lancet/v2/fileutil"
 	"os"
 	"path"
+	"server/lib/logs"
 	"text/template"
 )
 
-type Service struct{}
+type ServiceStruct struct{}
 
-var ServiceInstance = &Service{}
+var Service *ServiceStruct
 
-func (s *Service) GetList() []string {
+func init() {
+	Service = &ServiceStruct{}
+}
+
+func (s *ServiceStruct) GetList() []string {
 	return []string{"1", "2", "3"}
 }
 
@@ -21,9 +25,9 @@ type TemplateContext struct {
 	Name string
 }
 
-func (s *Service) CreateModule(name string) error {
+func (s *ServiceStruct) CreateModule(name string) error {
 	dir := path.Join("modules", name)
-	fmt.Println("dir", dir)
+	logs.Debug().Str("dir", dir).Str("name", name).Msg("")
 	if fileutil.IsExist(dir) {
 		return errors.New("文件夹已存在")
 	}

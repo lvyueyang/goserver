@@ -1,10 +1,7 @@
 IgnoreDirs = [".git", ".idea", "docs", "logs"]
 
-IgnoreFiles = ["server"]
+IgnoreFiles = ["server", "server.exe"]
 
 runs = [
     "swag init",
-    "killall server",
-    "go build -o server",
-    "./server"
 ]

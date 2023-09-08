@@ -46,3 +46,8 @@ func Err(data any, msg string, code int) Result {
 func ParamErr(msg string) (int, Result) {
 	return http.StatusBadRequest, Err(nil, msg, http.StatusBadRequest)
 }
+
+// ServerErr 服务器错误返回
+func ServerErr(data any, msg string, code int) (int, Result) {
+	return http.StatusInternalServerError, Err(data, msg, code)
+}

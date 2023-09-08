@@ -3,21 +3,19 @@ package cli
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"net/http"
+	"github.com/gin-gonic/gin/binding"
 	"server/config"
 	"server/lib/types"
+	"server/lib/validate"
 	"server/utils/resp"
 )
 
 type Controller struct {
-	service *Service
 }
 
 var New types.Controller = func(e *gin.Engine) {
 	router := e.Group("/api/cli")
-	controller := &Controller{
-		service: ServiceInstance,
-	}
+	controller := &Controller{}
 	fmt.Println("DEV", config.Config.IsDev)
 	// 非开发环境禁止使用
 	if !config.Config.IsDev {
@@ -51,11 +49,15 @@ type CreateModuleBody struct {
 //	@Failure		500		{object}	resp.Result{data=string}	"resp"
 //	@Router			/api/cli/module/create [post]
 func (c *Controller) CreateModule(ctx *gin.Context) {
-	name := ctx.Query("name")
-	err := c.service.CreateModule(name)
+	var body CreateModuleBody
+	if err := ctx.ShouldBindBodyWith(&body, binding.JSON); err != nil {
+		ctx.JSON(resp.ParamErr(validate.ErrTransform(err)))
+		return
+	}
+	err := Service.CreateModule(body.Name)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, resp.Err(err.Error(), "创建失败", 500))
+		ctx.JSON(resp.ServerErr(err.Error(), "创建失败", 500))
 		return
 	}
 

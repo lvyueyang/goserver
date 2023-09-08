@@ -8,14 +8,11 @@ import (
 )
 
 type Controller struct {
-	service Service
 }
 
 func New(e *gin.Engine) {
 	router := e.Group("/api/user")
-	controller := Controller{
-		service: ServiceInstance,
-	}
+	controller := &Controller{}
 	router.GET("/list", controller.FindList)
 	router.POST("/create", controller.Create)
 }
@@ -29,7 +26,7 @@ func New(e *gin.Engine) {
 //	@Success	200	{object}	string	"resp"
 //	@Router		/api/user/list [get]
 func (c *Controller) FindList(ctx *gin.Context) {
-	list := c.service.GetList()
+	list := Service.GetList()
 	ctx.JSON(resp.Succ(list))
 }
 

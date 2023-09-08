@@ -2,20 +2,19 @@ package {{.Name}}
 
 import (
     "github.com/gin-gonic/gin"
-    "net/http"
-    "server/utils/jsonutil"
+    "server/utils/resp"
 )
 
 type Controller struct {
-    service Service
+    service *Service
 }
 
-func Register(e *gin.Engine) {
+func New(e *gin.Engine) {
     router := e.Group("/api/{{.Name}}")
-    controller := Controller{
+    controller := &Controller{
         service: ServiceInstance,
     }
-    router.GET("/list", controller.FindList)
+    router.GET("", controller.FindList)
 }
 
 // FindList godoc
@@ -27,5 +26,5 @@ func Register(e *gin.Engine) {
 //	@Success		200		{object}	jsonutil.ResponseData	"res"
 //	@Router			/api/{{.Name}}/create [get]
 func (c *Controller) FindList(ctx *gin.Context) {
-    ctx.JSON(http.StatusOK, jsonutil.SuccessResponse(nil, "success"))
+    ctx.JSON(resp.Succ(nil))
 }

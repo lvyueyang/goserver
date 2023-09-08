@@ -2,10 +2,10 @@ package {{.Name}}
 
 type Service struct{}
 
-var ServiceInstance Service
+var ServiceInstance *Service
 
 func init() {
-	ServiceInstance = Service{}
+	ServiceInstance = &Service{}
 }
 
 func (s *Service) GetList() {
