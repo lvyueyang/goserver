@@ -7,3 +7,7 @@ port = 4002
 # 日志
 [log]
 output = "/Users/lyy/code/project/goserver/logs"
+
+# 用户认证
+[auth]
+tokenSecret = "ajax.red"

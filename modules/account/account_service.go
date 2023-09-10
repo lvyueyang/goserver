@@ -1,18 +1,15 @@
 package account
 
 import (
-	"errors"
 	"gorm.io/gorm"
 	"server/db"
+	"server/lib/errs"
+	"server/modules/user"
 )
 
-type ServiceStruct struct {
-	db *gorm.DB
-}
+type ServiceStruct struct{}
 
 var Service *ServiceStruct
-
-var storage = db.Database.Model(&Account{})
 
 func init() {
 	db.InitTable(Account{})
@@ -27,53 +24,73 @@ func (s *ServiceStruct) CreateNormal(userID uint, username, password string) (Ac
 		Password: password,
 		UserID:   userID,
 	}
-	storage.Create(&info)
+	db.Database.Create(&info)
 	return info, nil
 }
 
 // CreateEmail 创建邮箱账号，邮箱用户名和密码
-func (s *ServiceStruct) CreateEmail(userID uint, username, email, password string) (Account, error) {
-	nilAccount := Account{}
-
-	if list := s.UseEmailFindList(email); len(list) > 0 {
-		return nilAccount, errors.New("邮箱已注册")
+func (s *ServiceStruct) CreateEmail(username, email, password string) (user.User, error) {
+	userInfo := user.User{
+		Email: email,
 	}
-	if list := s.UseUsernameFindList(username); len(list) > 0 {
-		return nilAccount, errors.New("用户名已注册")
-	}
-
-	info := Account{
+	accountInfo := Account{
 		Type:     EmailAccountType,
 		Username: username,
 		Password: password,
 		Email:    email,
-		UserID:   userID,
 	}
-	storage.Create(&info)
-	return info, nil
+
+	if err := createUserAccount(&userInfo, &accountInfo); err != nil {
+		return user.User{}, err
+	}
+	return userInfo, nil
 }
 
 // CreateWxMp 创建微信小程序账号，openid
-func (s *ServiceStruct) CreateWxMp(userID uint, openid string) (Account, error) {
-	info := Account{
+func (s *ServiceStruct) CreateWxMp(openid string) (user.User, error) {
+	userInfo := user.User{}
+	accountInfo := Account{
 		Type:     WxMpAccountType,
-		UserID:   userID,
 		WxOpenId: openid,
 	}
-	storage.Create(&info)
-	return info, nil
+	if err := createUserAccount(&userInfo, &accountInfo); err != nil {
+		return user.User{}, err
+	}
+	return userInfo, nil
 }
 
-// UseEmailFindList 使用邮箱查账号
-func (s *ServiceStruct) UseEmailFindList(email string) []Account {
-	var list []Account
-	storage.Find(&list, "email = ?", email)
-	return list
+// UseEmailFindOne 使用邮箱查账号
+func (s *ServiceStruct) UseEmailFindOne(email string) (Account, int64) {
+	account := Account{}
+	result := db.Database.First(&account, "email = ?", email)
+	return account, result.RowsAffected
 }
 
-// UseUsernameFindList 使用用户名查账号
-func (s *ServiceStruct) UseUsernameFindList(username string) []Account {
-	var list []Account
-	storage.Find(&list, "username = ?", username)
-	return list
+// UseUsernameFindOne 使用用户名查账号
+func (s *ServiceStruct) UseUsernameFindOne(username string) (Account, int64) {
+	account := Account{}
+	result := db.Database.First(&account, "username = ?", username)
+	return account, result.RowsAffected
+}
+
+// UseWxMpOpenIDFindOne 使用微信 openid 查账号
+func (s *ServiceStruct) UseWxMpOpenIDFindOne(openid string) (Account, int64) {
+	account := Account{}
+	result := db.Database.First(&account, "openid = ?", openid)
+	return account, result.RowsAffected
+}
+
+func createUserAccount(userInfo *user.User, accountInfo *Account) error {
+	err := db.Database.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&userInfo).Error; err != nil {
+			return errs.CreateServerError("创建用户失败", err, userInfo)
+		}
+		accountInfo.UserID = userInfo.ID
+		if err := tx.Create(&accountInfo).Error; err != nil {
+			return errs.CreateServerError("创建用户账号失败", err, accountInfo)
+		}
+
+		return nil
+	})
+	return errs.CreateServerError("创建用户账号事务失败", err, nil)
 }

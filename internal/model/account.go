@@ -1,12 +1,13 @@
-package account
+package model
 
 import (
 	"gorm.io/gorm"
+	"server/consts"
 )
 
 type Account struct {
 	gorm.Model
-	Type      Type
+	Type      consts.AccountType
 	Username  string `gorm:"unique"`
 	Password  string
 	Email     string `gorm:"unique"`

@@ -10,15 +10,15 @@ import (
 	"github.com/go-playground/validator/v10"
 	enTranslations "github.com/go-playground/validator/v10/translations/en"
 	zhTranslations "github.com/go-playground/validator/v10/translations/zh"
+	"golang.org/x/exp/slog"
 	"reflect"
-	"server/lib/logs"
 	"strings"
 )
 
 func InitValidate() {
 	err := transInit("zh")
 	if err != nil {
-		logs.Err().Err(err).Msg("验证器国际化初始化失败")
+		slog.Error("验证器国际化初始化失败")
 	}
 }
 

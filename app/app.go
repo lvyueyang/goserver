@@ -2,21 +2,19 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
-	"server/modules/cli"
-	"server/modules/home"
-	"server/modules/swagger"
-	"server/modules/user"
+	"server/internal/controller"
 )
 
-var modules = []func(e *gin.Engine){
-	cli.New,
-	swagger.New,
-	user.New,
-	home.New,
+type Controller interface {
+	New(gin *gin.Engine)
 }
 
-func Run(r *gin.Engine) {
+var modules = []Controller{
+	&controller.HomeController{},
+}
+
+func New(r *gin.Engine) {
 	for _, module := range modules {
-		module(r)
+		module.New(r)
 	}
 }

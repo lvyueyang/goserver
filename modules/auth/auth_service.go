@@ -2,9 +2,13 @@ package auth
 
 import (
 	"errors"
+	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
+	"server/config"
+	"server/lib/errs"
 	"server/modules/account"
 	"server/modules/user"
+	"time"
 )
 
 type ServiceStruct struct{}
@@ -19,46 +23,109 @@ type LoginOptions struct {
 	Username string
 }
 
-// UsernameAndPasswordRegister 使用用户名邮箱和密码注册
-func (s *ServiceStruct) UsernameAndPasswordRegister(opt struct {
+type UsernameAndPasswordRegisterOptions struct {
 	Username string
 	Email    string
 	Code     string
 	Password string
-}) (token user.User, err error) {
-	nilUser := user.User{}
+}
 
-	if list := account.Service.UseEmailFindList(opt.Email); len(list) > 0 {
-		return nilUser, errors.New("邮箱已注册")
+// UsernameAndPasswordRegister 使用用户名邮箱和密码注册
+func (s *ServiceStruct) UsernameAndPasswordRegister(opt UsernameAndPasswordRegisterOptions) (string, error) {
+	// 验证用户名和邮箱是否已被使用
+	if _, count := account.Service.UseEmailFindOne(opt.Email); count > 0 {
+		return "", &errs.ClientError{Msg: "邮箱已存在", Info: nil}
 	}
-	if list := account.Service.UseUsernameFindList(opt.Username); len(list) > 0 {
-		return nilUser, errors.New("用户名已注册")
+	if _, count := account.Service.UseUsernameFindOne(opt.Username); count > 0 {
+		return "", &errs.ClientError{Msg: "用户名已存在", Info: nil}
 	}
 
-	// 创建用户
-	userinfo := user.Service.Create(user.CreateUser{
-		Email: opt.Email,
-	})
-
-	userAccount := account.Service.CreateEmail()
-
+	var hashPassword []byte
 	// 密码加盐
-	hashPasword, err := bcrypt.GenerateFromPassword([]byte(opt.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return user.User{}, err
+	if result, err := bcrypt.GenerateFromPassword([]byte(opt.Password), bcrypt.DefaultCost); err != nil {
+		return "", &errs.ServerError{Msg: "密码加盐失败", Err: err, Info: opt}
+	} else {
+		hashPassword = result
 	}
 
-	user.Service.Create(user.CreateUser{
-		Email: opt.Email,
-	})
+	var userInfo user.User
+	// 创建账号
+	if result, err := account.Service.CreateEmail(opt.Username, opt.Email, string(hashPassword)); err != nil {
+		return "", &errs.ServerError{Msg: "账号创建失败", Err: err, Info: opt}
+	} else {
+		userInfo = result
+	}
 
-	return user.User{}, nil
+	token, err := CreateToken(userInfo, account.EmailAccountType)
+
+	if err != nil {
+		errInfo := map[string]any{"userInfo": userInfo, "opt": opt}
+		return "", errs.CreateServerError("Token 生成失败", err, errInfo)
+	}
+	return token, nil
 }
 
 // UsernameAndPasswordLogin 使用用户名和密码登录
-func (s *ServiceStruct) UsernameAndPasswordLogin(username string, password string) (token string, err error) {
-	return "", nil
+func (s *ServiceStruct) UsernameAndPasswordLogin(username string, password string) (string, error) {
+	info, count := account.Service.UseUsernameFindOne(username)
+	if count == 0 {
+		return "", &errs.ClientError{Msg: "用户名未注册", Info: nil}
+	}
+	err := bcrypt.CompareHashAndPassword([]byte(info.Password), []byte(password))
+	if err != nil {
+		return "", errs.CreateClientError("密码错误", nil)
+	}
+	userinfo := user.Service.FindByID(info.UserID)
+	token, err := CreateToken(userinfo, info.Type)
+	if err != nil {
+		return "", errs.CreateServerError("Token 生成失败", err, nil)
+	}
+	return token, nil
 }
 
 func (s *ServiceStruct) Register() {
+}
+
+type Claims struct {
+	UserID      uint         `json:"user_id"`
+	AccountType account.Type `json:"account_type"`
+	jwt.RegisteredClaims
+}
+
+var HmacSecret = []byte("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJuYmYiOjE0NDQ0Nzg0MDB9.u1riaD1rW97opCoAuRCTy4w58Br-Zk-bh7vLiRIsrpU")
+
+func CreateToken(user user.User, accountType account.Type) (string, error) {
+	now := time.Now()
+	expireTime := now.Add(7 * 24 * time.Hour)
+	claims := Claims{
+		user.ID,
+		accountType,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expireTime),
+			Issuer:    config.Config.Auth.TokenSecret,
+		},
+	}
+
+	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	token, err := tokenClaims.SigningString()
+	if err != nil {
+		return "", &errs.ServerError{Msg: "Token 生成失败", Err: err, Info: user}
+	}
+	return token, nil
+}
+
+func ParseToken(token string) (*Claims, error) {
+	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return HmacSecret, nil
+	})
+	if err != nil {
+		return nil, &errs.ServerError{Msg: "Token 解析失败", Err: err, Info: token}
+	}
+	if tokenClaims != nil {
+		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
+			return claims, nil
+		}
+	}
+	return nil, &errs.ServerError{Msg: "Token 解析失败", Err: errors.New(tokenClaims.Raw), Info: tokenClaims}
 }

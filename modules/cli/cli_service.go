@@ -5,7 +5,6 @@ import (
 	"github.com/duke-git/lancet/v2/fileutil"
 	"os"
 	"path"
-	"server/lib/logs"
 	"text/template"
 )
 
@@ -27,7 +26,7 @@ type TemplateContext struct {
 
 func (s *ServiceStruct) CreateModule(name string) error {
 	dir := path.Join("modules", name)
-	logs.Debug().Str("dir", dir).Str("name", name).Msg("")
+	logger.Debug().Str("dir", dir).Str("name", name).Msg("")
 	if fileutil.IsExist(dir) {
 		return errors.New("文件夹已存在")
 	}
@@ -36,7 +35,7 @@ func (s *ServiceStruct) CreateModule(name string) error {
 		return creatDirErr
 	}
 
-	modNames := []string{"controller", "service", "model"}
+	modNames := []string{"api", "service", "model"}
 	for _, modName := range modNames {
 		filePath := path.Join(dir, name+"_"+modName+".go")
 		tempFile, _ := template.ParseFiles("modules/cli/template/" + modName + ".tpl")

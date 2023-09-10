@@ -3,11 +3,11 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"golang.org/x/exp/slog"
 	"net/http"
-	"server/lib/logs"
+	"server/lib/logger"
 	"strings"
 	"time"
 )
@@ -82,34 +82,36 @@ func loggerMiddleware() gin.HandlerFunc {
 		// Path 是 /api 开头的
 		if strings.HasPrefix(param.Path, "/api") {
 			if param.StatusCode == http.StatusOK {
-				fmt.Println("请求成功", param.Path)
-				logs.Info().
-					Str("path", param.Path).
-					Str("method", param.Method).
-					Str("ip", param.ClientIP).
-					Dur("duration", param.Duration).
-					Time("timeStamp", param.TimeStamp).
-					Int("status", param.StatusCode).
-					Int("responseSize", param.ResponseSize).
-					Str("response", param.Response).
-					Str("body", param.Body).
-					Str("query", param.Query).
-					Msg("RequestSuccess")
-
+				logger.Info("RequestSuccess",
+					slog.Group("info",
+						slog.String("path", param.Path),
+						slog.String("method", param.Method),
+						slog.String("ip", param.ClientIP),
+						slog.Duration("duration", param.Duration),
+						slog.Time("timeStamp", param.TimeStamp),
+						slog.Int("status", param.StatusCode),
+						slog.Int("responseSize", param.ResponseSize),
+						slog.String("response", param.Response),
+						slog.String("body", param.Body),
+						slog.String("query", param.Query),
+					),
+				)
 			} else {
-				logs.Err().
-					Str("path", param.Path).
-					Str("method", param.Method).
-					Str("ip", param.ClientIP).
-					Dur("duration", param.Duration).
-					Time("timeStamp", param.TimeStamp).
-					Int("status", param.StatusCode).
-					Int("responseSize", param.ResponseSize).
-					Str("response", param.Response).
-					Str("body", param.Body).
-					Str("error", param.ErrorMessage).
-					Str("query", param.Query).
-					Msg("RequestSuccess")
+				logger.Error("RequestSuccess",
+					slog.Group("info",
+						slog.String("path", param.Path),
+						slog.String("method", param.Method),
+						slog.String("ip", param.ClientIP),
+						slog.Duration("duration", param.Duration),
+						slog.Time("timeStamp", param.TimeStamp),
+						slog.Int("status", param.StatusCode),
+						slog.Int("responseSize", param.ResponseSize),
+						slog.String("response", param.Response),
+						slog.String("body", param.Body),
+						slog.String("query", param.Query),
+						slog.String("query", param.Query),
+					),
+				)
 			}
 		}
 	}

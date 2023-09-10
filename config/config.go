@@ -1,12 +1,11 @@
 package config
 
 import (
-	"fmt"
 	"github.com/duke-git/lancet/v2/fileutil"
 	"github.com/spf13/viper"
 	"path"
 	"server/consts"
-	"server/lib/console"
+	"server/lib/logger"
 	"server/utils"
 )
 
@@ -14,17 +13,22 @@ type LogConfig struct {
 	Output string // 日志路径
 }
 
+type AuthConfig struct {
+	TokenSecret string // token 秘钥
+}
+
 type Result struct {
-	Env    string    //  环境
-	IsDev  bool      //  是否是开发环境
-	IsProd bool      //  是否是生产环境
-	Port   int       //  端口
-	Log    LogConfig // 日志
+	Env    string     //  环境
+	IsDev  bool       //  是否是开发环境
+	IsProd bool       //  是否是生产环境
+	Port   int        //  端口
+	Log    LogConfig  // 日志
+	Auth   AuthConfig // 用户认证
 }
 
 var Config Result
 
-func Run() {
+func New() {
 	viper.SetConfigFile("config/config.prod.toml")
 	viper.SetConfigType("toml")
 
@@ -48,9 +52,7 @@ func Run() {
 		envName = utils.EnumLabel(consts.EnvProd)
 	}
 
-	console.Success("配置文件加载成功")
-	fmt.Printf("%+v\n", Config)
-	console.Success("当前环境：", envName)
+	logger.Success("配置文件加载成功", "config", Config, "当前环境", envName)
 }
 
 // GetLoggerOutPutPath 获取日志输出路径
