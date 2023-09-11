@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"golang.org/x/exp/slog"
 	"net/http"
-	"server/lib/logger"
 	"strings"
 	"time"
 )
@@ -82,7 +81,7 @@ func loggerMiddleware() gin.HandlerFunc {
 		// Path 是 /api 开头的
 		if strings.HasPrefix(param.Path, "/api") {
 			if param.StatusCode == http.StatusOK {
-				logger.Info("RequestSuccess",
+				slog.Info("RequestSuccess",
 					slog.Group("info",
 						slog.String("path", param.Path),
 						slog.String("method", param.Method),
@@ -97,7 +96,7 @@ func loggerMiddleware() gin.HandlerFunc {
 					),
 				)
 			} else {
-				logger.Error("RequestSuccess",
+				slog.Error("RequestSuccess",
 					slog.Group("info",
 						slog.String("path", param.Path),
 						slog.String("method", param.Method),

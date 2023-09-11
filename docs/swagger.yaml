@@ -1,4 +1,33 @@
 definitions:
+  api.LoginBodyDto:
+    properties:
+      password:
+        description: 密码
+        type: string
+      username:
+        description: 用户名
+        type: string
+    type: object
+  api.LoginSuccessResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  api.RegisterBodyDto:
+    properties:
+      code:
+        description: 邮箱验证码
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      password:
+        description: 密码
+        type: string
+      username:
+        description: 用户名
+        type: string
+    type: object
   cli.CreateModuleBody:
     properties:
       name:
@@ -13,23 +42,77 @@ definitions:
       msg:
         type: string
     type: object
-  user.CreateUserBodyDto:
-    properties:
-      name:
-        description: 姓名
-        type: string
-      sex:
-        description: 性别
-        type: string
-    required:
-    - name
-    - sex
-    type: object
 info:
   contact: {}
   title: 男生自用 API 接口文档
   version: "1.0"
 paths:
+  /admin/api/user/list:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            type: string
+      summary: 用户列表
+      tags:
+      - 管理后台-用户
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.LoginBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.LoginSuccessResponse'
+              type: object
+      summary: 用户登录
+      tags:
+      - 用户
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.RegisterBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.LoginSuccessResponse'
+              type: object
+      summary: 用户注册
+      tags:
+      - 用户
   /api/cli/module/create:
     post:
       consumes:
@@ -66,37 +149,4 @@ paths:
       summary: 创建模块
       tags:
       - cli
-  /api/user/create:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: body
-        in: body
-        name: req
-        required: true
-        schema:
-          $ref: '#/definitions/user.CreateUserBodyDto'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: resp
-      summary: 创建用户
-      tags:
-      - user
-  /api/user/list:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: resp
-          schema:
-            type: string
-      summary: 用户列表
-      tags:
-      - user
 swagger: "2.0"

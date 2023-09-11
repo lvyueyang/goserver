@@ -2,7 +2,6 @@ package model
 
 import (
 	"gorm.io/gorm"
-	"server/modules/account"
 )
 
 type User struct {
@@ -11,7 +10,7 @@ type User struct {
 	Age     uint32
 	Email   string `gorm:"uniqueIndex"`
 	Avatar  string
-	Account []account.Account
+	Account []Account
 }
 
 func (User) TableName() string {

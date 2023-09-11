@@ -5,8 +5,6 @@ import (
 	"github.com/spf13/viper"
 	"path"
 	"server/consts"
-	"server/lib/logger"
-	"server/utils"
 )
 
 type LogConfig struct {
@@ -46,13 +44,6 @@ func New() {
 
 	Config.IsDev = Config.Env == string(consts.EnvDev)
 	Config.IsProd = Config.Env == string(consts.EnvProd)
-
-	var envName = utils.EnumLabel(consts.EnvDev)
-	if Config.IsProd {
-		envName = utils.EnumLabel(consts.EnvProd)
-	}
-
-	logger.Success("配置文件加载成功", "config", Config, "当前环境", envName)
 }
 
 // GetLoggerOutPutPath 获取日志输出路径

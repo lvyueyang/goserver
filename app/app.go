@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
-	"server/internal/controller"
+	"server/modules/api"
 )
 
 type Controller interface {
@@ -10,7 +10,10 @@ type Controller interface {
 }
 
 var modules = []Controller{
-	&controller.HomeController{},
+	new(api.SwaggerController),
+
+	new(api.HomeController),
+	new(api.UserController),
 }
 
 func New(r *gin.Engine) {

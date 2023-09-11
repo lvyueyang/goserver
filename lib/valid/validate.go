@@ -1,4 +1,4 @@
-package validate
+package valid
 
 import (
 	"errors"
@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func InitValidate() {
+func New() {
 	err := transInit("zh")
 	if err != nil {
 		slog.Error("验证器国际化初始化失败")

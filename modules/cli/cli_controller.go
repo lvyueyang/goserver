@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"server/config"
 	"server/lib/types"
-	"server/lib/validate"
+	"server/lib/valid"
 	"server/utils/resp"
 )
 
@@ -51,7 +51,7 @@ type CreateModuleBody struct {
 func (c *Controller) CreateModule(ctx *gin.Context) {
 	var body CreateModuleBody
 	if err := ctx.ShouldBindBodyWith(&body, binding.JSON); err != nil {
-		ctx.JSON(resp.ParamErr(validate.ErrTransform(err)))
+		ctx.JSON(resp.ParamErr(valid.ErrTransform(err)))
 		return
 	}
 	err := Service.CreateModule(body.Name)

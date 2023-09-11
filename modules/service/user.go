@@ -2,20 +2,20 @@ package service
 
 import (
 	"server/db"
-	"server/internal/model"
+	"server/modules/model"
 )
 
-type ServiceStruct struct {
+type UserServiceStruct struct {
 }
 
-var UserService *ServiceStruct
+var UserService *UserServiceStruct
 
 func init() {
-	db.InitTable(model.User{})
-	UserService = &ServiceStruct{}
+	db.InitTable(new(model.User))
+	UserService = &UserServiceStruct{}
 }
 
-func (s *ServiceStruct) GetList() []model.User {
+func (s *UserServiceStruct) GetList() []model.User {
 	var list []model.User
 	db.Database.Find(&list)
 	return list
@@ -28,13 +28,13 @@ type CreateUser struct {
 	Avatar string
 }
 
-func (s *ServiceStruct) FindByID(id uint) model.User {
+func (s *UserServiceStruct) FindByID(id uint) model.User {
 	user := model.User{}
 	db.Database.First(&user, "id = ?", id)
 	return user
 }
 
-func (s *ServiceStruct) Create(u CreateUser) model.User {
+func (s *UserServiceStruct) Create(u CreateUser) model.User {
 	user := model.User{
 		Name:   u.Name,
 		Age:    u.Age,

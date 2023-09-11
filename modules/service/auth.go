@@ -1,22 +1,22 @@
-package auth
+package service
 
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 	"server/config"
+	"server/consts"
 	"server/lib/errs"
-	"server/modules/account"
-	"server/modules/user"
+	"server/modules/model"
 	"time"
 )
 
-type ServiceStruct struct{}
+type AuthServiceStruct struct{}
 
-var Service *ServiceStruct
+var AuthService *AuthServiceStruct
 
 func init() {
-	Service = &ServiceStruct{}
+	AuthService = &AuthServiceStruct{}
 }
 
 type LoginOptions struct {
@@ -31,32 +31,38 @@ type UsernameAndPasswordRegisterOptions struct {
 }
 
 // UsernameAndPasswordRegister 使用用户名邮箱和密码注册
-func (s *ServiceStruct) UsernameAndPasswordRegister(opt UsernameAndPasswordRegisterOptions) (string, error) {
+func (s *AuthServiceStruct) UsernameAndPasswordRegister(email, username, password, code string) (string, error) {
+	var opt = map[string]string{
+		"email":    email,
+		"username": username,
+		"password": password,
+		"code":     code,
+	}
 	// 验证用户名和邮箱是否已被使用
-	if _, count := account.Service.UseEmailFindOne(opt.Email); count > 0 {
+	if _, count := AccountService.UseEmailFindOne(email); count > 0 {
 		return "", &errs.ClientError{Msg: "邮箱已存在", Info: nil}
 	}
-	if _, count := account.Service.UseUsernameFindOne(opt.Username); count > 0 {
+	if _, count := AccountService.UseUsernameFindOne(username); count > 0 {
 		return "", &errs.ClientError{Msg: "用户名已存在", Info: nil}
 	}
 
 	var hashPassword []byte
 	// 密码加盐
-	if result, err := bcrypt.GenerateFromPassword([]byte(opt.Password), bcrypt.DefaultCost); err != nil {
+	if result, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost); err != nil {
 		return "", &errs.ServerError{Msg: "密码加盐失败", Err: err, Info: opt}
 	} else {
 		hashPassword = result
 	}
 
-	var userInfo user.User
+	var userInfo model.User
 	// 创建账号
-	if result, err := account.Service.CreateEmail(opt.Username, opt.Email, string(hashPassword)); err != nil {
+	if result, err := AccountService.CreateEmail(username, email, string(hashPassword)); err != nil {
 		return "", &errs.ServerError{Msg: "账号创建失败", Err: err, Info: opt}
 	} else {
 		userInfo = result
 	}
 
-	token, err := CreateToken(userInfo, account.EmailAccountType)
+	token, err := CreateToken(userInfo, consts.EmailAccountType)
 
 	if err != nil {
 		errInfo := map[string]any{"userInfo": userInfo, "opt": opt}
@@ -66,8 +72,8 @@ func (s *ServiceStruct) UsernameAndPasswordRegister(opt UsernameAndPasswordRegis
 }
 
 // UsernameAndPasswordLogin 使用用户名和密码登录
-func (s *ServiceStruct) UsernameAndPasswordLogin(username string, password string) (string, error) {
-	info, count := account.Service.UseUsernameFindOne(username)
+func (s *AuthServiceStruct) UsernameAndPasswordLogin(username string, password string) (string, error) {
+	info, count := AccountService.UseUsernameFindOne(username)
 	if count == 0 {
 		return "", &errs.ClientError{Msg: "用户名未注册", Info: nil}
 	}
@@ -75,7 +81,7 @@ func (s *ServiceStruct) UsernameAndPasswordLogin(username string, password strin
 	if err != nil {
 		return "", errs.CreateClientError("密码错误", nil)
 	}
-	userinfo := user.Service.FindByID(info.UserID)
+	userinfo := UserService.FindByID(info.UserID)
 	token, err := CreateToken(userinfo, info.Type)
 	if err != nil {
 		return "", errs.CreateServerError("Token 生成失败", err, nil)
@@ -83,18 +89,18 @@ func (s *ServiceStruct) UsernameAndPasswordLogin(username string, password strin
 	return token, nil
 }
 
-func (s *ServiceStruct) Register() {
+func (s *AuthServiceStruct) Register() {
 }
 
 type Claims struct {
-	UserID      uint         `json:"user_id"`
-	AccountType account.Type `json:"account_type"`
+	UserID      uint               `json:"user_id"`
+	AccountType consts.AccountType `json:"account_type"`
 	jwt.RegisteredClaims
 }
 
 var HmacSecret = []byte("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJuYmYiOjE0NDQ0Nzg0MDB9.u1riaD1rW97opCoAuRCTy4w58Br-Zk-bh7vLiRIsrpU")
 
-func CreateToken(user user.User, accountType account.Type) (string, error) {
+func CreateToken(user model.User, accountType consts.AccountType) (string, error) {
 	now := time.Now()
 	expireTime := now.Add(7 * 24 * time.Hour)
 	claims := Claims{
