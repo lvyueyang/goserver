@@ -55,7 +55,8 @@ func (c *AuthController) Register(ctx *gin.Context) {
 		ctx.JSON(resp.ParamErr(valid.ErrTransform(err)))
 		return
 	}
-	token, err := service.AuthService.UsernameAndPasswordRegister(body.Email, body.Username, body.Password, body.Code)
+
+	token, err := service.AuthService.UsernameAndPasswordRegister(body.Email, body.Username, body.Password)
 	if err != nil {
 		ctx.JSON(resp.ParseErr(err))
 	} else {
@@ -72,7 +73,7 @@ type RegisterBodyDto struct {
 	Username string `json:"username"` // 用户名
 	Password string `json:"password"` // 密码
 	Email    string `json:"email"`    // 邮箱
-	Code     string `json:"code"`     // 邮箱验证码
+	Captcha  string `json:"captcha"`  // 邮箱验证码
 }
 
 type LoginSuccessResponse struct {

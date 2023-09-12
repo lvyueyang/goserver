@@ -11,8 +11,8 @@ type UserServiceStruct struct {
 var UserService *UserServiceStruct
 
 func init() {
-	db.InitTable(new(model.User))
-	UserService = &UserServiceStruct{}
+	//db.InitTable(new(model.User))
+	UserService = new(UserServiceStruct)
 }
 
 func (s *UserServiceStruct) GetList() []model.User {

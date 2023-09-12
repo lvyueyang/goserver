@@ -14,6 +14,9 @@ var modules = []Controller{
 
 	new(api.HomeController),
 	new(api.UserController),
+	new(api.AccountController),
+	new(api.AuthController),
+	new(api.CaptchaController),
 }
 
 func New(r *gin.Engine) {

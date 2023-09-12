@@ -7,13 +7,13 @@ import (
 
 type Account struct {
 	gorm.Model
-	Type      consts.AccountType
-	Username  string `gorm:"unique"`
-	Password  string
-	Email     string `gorm:"unique"`
-	WxOpenId  string
-	WxUnionId string
-	UserID    uint
+	Type      consts.AccountType `json:"type"`
+	Username  string             `json:"username" gorm:"unique"`
+	Password  string             `json:"password"`
+	Email     string             `json:"email" gorm:"unique"`
+	WxOpenId  string             `json:"wx_open_id"`
+	WxUnionId string             `json:"wx_union_id"`
+	UserID    uint               `json:"user_id"`
 }
 
 func (*Account) TableName() string {

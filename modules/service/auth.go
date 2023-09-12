@@ -16,7 +16,7 @@ type AuthServiceStruct struct{}
 var AuthService *AuthServiceStruct
 
 func init() {
-	AuthService = &AuthServiceStruct{}
+	AuthService = new(AuthServiceStruct)
 }
 
 type LoginOptions struct {
@@ -31,12 +31,11 @@ type UsernameAndPasswordRegisterOptions struct {
 }
 
 // UsernameAndPasswordRegister 使用用户名邮箱和密码注册
-func (s *AuthServiceStruct) UsernameAndPasswordRegister(email, username, password, code string) (string, error) {
+func (s *AuthServiceStruct) UsernameAndPasswordRegister(email, username, password string) (string, error) {
 	var opt = map[string]string{
 		"email":    email,
 		"username": username,
 		"password": password,
-		"code":     code,
 	}
 	// 验证用户名和邮箱是否已被使用
 	if _, count := AccountService.UseEmailFindOne(email); count > 0 {

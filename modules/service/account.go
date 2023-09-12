@@ -13,8 +13,8 @@ type AccountServiceStruct struct{}
 var AccountService *AccountServiceStruct
 
 func init() {
-	db.InitTable(new(model.Account))
-	AccountService = &AccountServiceStruct{}
+	//db.InitTable(new(model.Account))
+	AccountService = new(AccountServiceStruct)
 }
 
 // CreateNormal 创建普通账号，用户名和密码

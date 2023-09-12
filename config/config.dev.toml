@@ -11,3 +11,10 @@ output = "/Users/lyy/code/project/goserver/logs"
 # 用户认证
 [auth]
 tokenSecret = "ajax.red"
+
+[db]
+host = "localhost"
+user  = "postgres"
+password = "123456"
+port = 5432
+dbname = "cms_dev"

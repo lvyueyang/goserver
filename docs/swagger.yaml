@@ -15,7 +15,7 @@ definitions:
     type: object
   api.RegisterBodyDto:
     properties:
-      code:
+      captcha:
         description: 邮箱验证码
         type: string
       email:
@@ -113,6 +113,41 @@ paths:
       summary: 用户注册
       tags:
       - 用户
+  /api/captcha:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 验证码类型， 1-手机 2-邮箱 3-图片
+        enum:
+        - "1"
+        - "2"
+        - "3"
+        in: query
+        name: type
+        required: true
+        type: string
+      - description: 手机/邮箱(图片类型可以不传)
+        in: query
+        name: value
+        type: string
+      - description: 使用场景， 1-注册
+        enum:
+        - "1"
+        in: query
+        name: scenes
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求结果
+          schema:
+            type: string
+      summary: 获取验证码
+      tags:
+      - 验证码
   /api/cli/module/create:
     post:
       consumes:
