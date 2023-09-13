@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"server/consts"
 	"server/lib/valid"
 	"server/modules/service"
@@ -20,37 +21,38 @@ func NewCaptchaController(e *gin.Engine) {
 	}
 
 	router := e.Group("/api/captcha")
-	router.GET("", c.Create)
+	router.POST("", c.Create)
 	router.GET("/image", c.CreateImage)
 	router.GET("/verify/:id", c.Verify)
 }
 
 // Create
 //
-//	@Summary	获取验证码
+//	@Summary	发送验证码
 //	@Tags		验证码
 //	@Accept		json
 //	@Produce	json
-//	@Param		type	query		string									true	"验证码类型， 1-手机 2-邮箱"	Enums(1,2)
-//	@Param		value	query		string									true	"手机/邮箱账号"
-//	@Param		scenes	query		string									true	"使用场景， 1-注册"	Enums(1)"
-//	@Success	200		{object}	resp.Result{data=LoginSuccessResponse}	"请求结果"
-//	@Router		/api/captcha [get]
+//	@Param		req	body		CreateCaptchaReqDto			true	"body"
+//	@Success	200	{object}	resp.Result{}	"请求结果"
+//	@Router		/api/captcha [post]
 func (c *CaptchaController) Create(ctx *gin.Context) {
-	var query GetCaptchaQueryDto
-	if err := ctx.ShouldBindQuery(&query); err != nil {
+	var body CreateCaptchaReqDto
+	if err := ctx.ShouldBindBodyWith(&body, binding.JSON); err != nil {
+		fmt.Printf("%+v\n", err)
 		ctx.JSON(resp.ParamErr(valid.ErrTransform(err)))
 		return
 	}
-	if query.Value == "" {
-		ctx.JSON(resp.ParamErr(consts.CaptchaTypeMap[query.Type] + "不能为空"))
+
+	// 校验验证码
+	if succ := captcha.Verify(body.CaptchaKey, []byte(body.CaptchaValue)); !succ {
+		ctx.JSON(resp.ParamErr("图形验证码不正确"))
 		return
 	}
-	res := c.service.Create(query.Type, query.Value, query.Scenes)
-	img := captcha.NewImage(captcha.New(), []byte(res.Code), 100, 40)
 
-	fmt.Printf("res: %v\n", img)
-	ctx.JSON(resp.Succ(res))
+	// 创建邮箱验证码
+	c.service.Create(body.Type, body.Value, body.Scenes)
+
+	ctx.JSON(resp.Succ(nil))
 }
 
 // CreateImage
@@ -71,8 +73,10 @@ func (c *CaptchaController) Verify(ctx *gin.Context) {
 	captcha.WriteImage(ctx.Writer, id, consts.CaptchaWidth, consts.CaptchaHeight)
 }
 
-type GetCaptchaQueryDto struct {
-	Type   consts.CaptchaType   `json:"type" form:"type" binding:"required"`
-	Value  string               `json:"value" form:"value"`
-	Scenes consts.CaptchaScenes `json:"scenes" form:"scenes"`
+type CreateCaptchaReqDto struct {
+	Type         consts.CaptchaType   `json:"type" binding:"required"`                        // 验证码类型， 1-手机 2-邮箱 Enums(1,2)
+	Value        string               `json:"value" binding:"required" label:"手机/邮箱账号"`       // 手机/邮箱账号
+	Scenes       consts.CaptchaScenes `json:"scenes" binding:"required"`                      // 使用场景， 1-注册
+	CaptchaKey   string               `json:"captcha_key" binding:"required"`                 // 图形验证码的key
+	CaptchaValue string               `json:"captcha_value" binding:"required" label:"图形验证码"` // 输入的图形验证码
 }

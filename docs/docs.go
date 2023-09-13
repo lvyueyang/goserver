@@ -129,7 +129,7 @@ const docTemplate = `{
             }
         },
         "/api/captcha": {
-            "get": {
+            "post": {
                 "consumes": [
                     "application/json"
                 ],
@@ -139,54 +139,23 @@ const docTemplate = `{
                 "tags": [
                     "验证码"
                 ],
-                "summary": "获取验证码",
+                "summary": "发送验证码",
                 "parameters": [
                     {
-                        "enum": [
-                            "1",
-                            "2"
-                        ],
-                        "type": "string",
-                        "description": "验证码类型， 1-手机 2-邮箱",
-                        "name": "type",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "手机/邮箱账号",
-                        "name": "value",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "enum": [
-                            "1"
-                        ],
-                        "type": "string",
-                        "description": "使用场景， 1-注册",
-                        "name": "scenes",
-                        "in": "query",
-                        "required": true
+                        "description": "body",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateCaptchaReqDto"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "请求结果",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/resp.Result"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/api.LoginSuccessResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/resp.Result"
                         }
                     }
                 }
@@ -292,6 +261,45 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.CreateCaptchaReqDto": {
+            "type": "object",
+            "required": [
+                "captcha_key",
+                "captcha_value",
+                "scenes",
+                "type",
+                "value"
+            ],
+            "properties": {
+                "captcha_key": {
+                    "description": "图形验证码的key",
+                    "type": "string"
+                },
+                "captcha_value": {
+                    "description": "输入的图形验证码",
+                    "type": "string"
+                },
+                "scenes": {
+                    "description": "使用场景， 1-注册",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/consts.CaptchaScenes"
+                        }
+                    ]
+                },
+                "type": {
+                    "description": "验证码类型， 1-手机 2-邮箱 Enums(1,2)",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/consts.CaptchaType"
+                        }
+                    ]
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "api.LoginBodyDto": {
             "type": "object",
             "properties": {
@@ -342,6 +350,33 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "consts.CaptchaScenes": {
+            "type": "integer",
+            "enum": [
+                1
+            ],
+            "x-enum-comments": {
+                "CaptchaScenesRegister": "注册"
+            },
+            "x-enum-varnames": [
+                "CaptchaScenesRegister"
+            ]
+        },
+        "consts.CaptchaType": {
+            "type": "integer",
+            "enum": [
+                1,
+                2
+            ],
+            "x-enum-comments": {
+                "CaptchaTypeEmail": "邮箱",
+                "CaptchaTypePhone": "手机号"
+            },
+            "x-enum-varnames": [
+                "CaptchaTypePhone",
+                "CaptchaTypeEmail"
+            ]
         },
         "resp.Result": {
             "type": "object",
