@@ -134,20 +134,20 @@
                     {
                         "enum": [
                             "1",
-                            "2",
-                            "3"
+                            "2"
                         ],
                         "type": "string",
-                        "description": "验证码类型， 1-手机 2-邮箱 3-图片",
+                        "description": "验证码类型， 1-手机 2-邮箱",
                         "name": "type",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "手机/邮箱(图片类型可以不传)",
+                        "description": "手机/邮箱账号",
                         "name": "value",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "enum": [
@@ -164,7 +164,53 @@
                     "200": {
                         "description": "请求结果",
                         "schema": {
-                            "type": "string"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resp.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/api.LoginSuccessResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/captcha/image": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "验证码"
+                ],
+                "summary": "获取图片验证码",
+                "responses": {
+                    "200": {
+                        "description": "请求结果",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resp.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }

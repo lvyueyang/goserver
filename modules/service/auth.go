@@ -6,17 +6,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"server/config"
 	"server/consts"
+	"server/dal/model"
 	"server/lib/errs"
-	"server/modules/model"
 	"time"
 )
 
-type AuthServiceStruct struct{}
+type AuthService struct {
+	accountService *AccountService
+	userService    *UserService
+}
 
-var AuthService *AuthServiceStruct
-
-func init() {
-	AuthService = new(AuthServiceStruct)
+func NewAuthService() *AuthService {
+	return &AuthService{
+		accountService: NewAccountService(),
+		userService:    NewUserService(),
+	}
 }
 
 type LoginOptions struct {
@@ -31,17 +35,17 @@ type UsernameAndPasswordRegisterOptions struct {
 }
 
 // UsernameAndPasswordRegister 使用用户名邮箱和密码注册
-func (s *AuthServiceStruct) UsernameAndPasswordRegister(email, username, password string) (string, error) {
+func (s *AuthService) UsernameAndPasswordRegister(email, username, password string) (string, error) {
 	var opt = map[string]string{
 		"email":    email,
 		"username": username,
 		"password": password,
 	}
 	// 验证用户名和邮箱是否已被使用
-	if _, count := AccountService.UseEmailFindOne(email); count > 0 {
+	if info, _ := s.accountService.UseEmailFindOne(email); info.ID != 0 {
 		return "", &errs.ClientError{Msg: "邮箱已存在", Info: nil}
 	}
-	if _, count := AccountService.UseUsernameFindOne(username); count > 0 {
+	if info, _ := s.accountService.UseUsernameFindOne(username); info.ID != 0 {
 		return "", &errs.ClientError{Msg: "用户名已存在", Info: nil}
 	}
 
@@ -55,7 +59,7 @@ func (s *AuthServiceStruct) UsernameAndPasswordRegister(email, username, passwor
 
 	var userInfo model.User
 	// 创建账号
-	if result, err := AccountService.CreateEmail(username, email, string(hashPassword)); err != nil {
+	if result, err := s.accountService.CreateEmail(username, email, string(hashPassword)); err != nil {
 		return "", &errs.ServerError{Msg: "账号创建失败", Err: err, Info: opt}
 	} else {
 		userInfo = result
@@ -71,16 +75,16 @@ func (s *AuthServiceStruct) UsernameAndPasswordRegister(email, username, passwor
 }
 
 // UsernameAndPasswordLogin 使用用户名和密码登录
-func (s *AuthServiceStruct) UsernameAndPasswordLogin(username string, password string) (string, error) {
-	info, count := AccountService.UseUsernameFindOne(username)
-	if count == 0 {
+func (s *AuthService) UsernameAndPasswordLogin(username string, password string) (string, error) {
+	info, _ := s.accountService.UseUsernameFindOne(username)
+	if info.ID == 0 {
 		return "", &errs.ClientError{Msg: "用户名未注册", Info: nil}
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(info.Password), []byte(password))
 	if err != nil {
 		return "", errs.CreateClientError("密码错误", nil)
 	}
-	userinfo := UserService.FindByID(info.UserID)
+	userinfo := s.userService.FindByID(info.UserID)
 	token, err := CreateToken(userinfo, info.Type)
 	if err != nil {
 		return "", errs.CreateServerError("Token 生成失败", err, nil)
@@ -88,7 +92,7 @@ func (s *AuthServiceStruct) UsernameAndPasswordLogin(username string, password s
 	return token, nil
 }
 
-func (s *AuthServiceStruct) Register() {
+func (s *AuthService) Register() {
 }
 
 type Claims struct {

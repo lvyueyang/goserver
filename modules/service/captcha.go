@@ -1,39 +1,26 @@
 package service
 
 import (
-	"gorm.io/gorm"
+	"context"
 	"server/consts"
-	"server/db"
+	"server/dal/model"
+	"server/dal/query"
 	"server/lib/errs"
-	"server/modules/model"
 	"server/utils"
 	"time"
 )
 
-type CaptchaStruct struct{}
+var captcha = query.Captcha
 
-var CaptchaService *CaptchaStruct
+type CaptchaService struct{}
 
-func init() {
-	//db.InitTable(new(model.Captcha))
-	CaptchaService = new(CaptchaStruct)
+func NewCaptchaService() *CaptchaService {
+	return new(CaptchaService)
 }
 
-func (s *CaptchaStruct) FindByID(id uint) (model.Captcha, *gorm.DB) {
-	var info = model.Captcha{}
-
-	result := db.Database.First(&info, "id = ?", id)
-
-	return info, result
-}
-
-// FindByOne 根据场景和值查找
-func (s *CaptchaStruct) FindByOne(current string, scenes consts.CaptchaScenes) (model.Captcha, *gorm.DB) {
-	var info = model.Captcha{}
-
-	result := db.Database.Order("updated_at desc").First(&info, "current = ? AND scenes = ? ", current, scenes)
-
-	return info, result
+func (s *CaptchaService) FindByID(id uint) model.Captcha {
+	info, _ := captcha.WithContext(context.Background()).Where(captcha.ID.Eq(id)).First()
+	return *info
 }
 
 // ValidateCode 验证手机/邮箱验证码
@@ -51,15 +38,16 @@ func validateCode(info model.Captcha, code string) (bool, error) {
 }
 
 // Validate 验证手机/邮箱验证码
-func (s *CaptchaStruct) Validate(current, code string, scenes consts.CaptchaScenes) (bool, error) {
-	info, err := s.FindByOne(current, scenes)
+func (s *CaptchaService) Validate(current, code string, scenes consts.CaptchaScenes) (bool, error) {
+	info, err := captcha.WithContext(context.Background()).Order(captcha.CreatedAt.Desc()).First()
+
 	if err != nil {
 		return false, errs.CreateClientError("验证码不存在", info)
 	}
-	return validateCode(info, code)
+	return validateCode(*info, code)
 }
 
-func (s *CaptchaStruct) Create(currentType consts.CaptchaType, current string, scenes consts.CaptchaScenes) model.Captcha {
+func (s *CaptchaService) Create(currentType consts.CaptchaType, current string, scenes consts.CaptchaScenes) model.Captcha {
 	code := utils.GenCaptcha()
 	info := model.Captcha{
 		CurrentType: currentType,
@@ -70,14 +58,12 @@ func (s *CaptchaStruct) Create(currentType consts.CaptchaType, current string, s
 		Scenes:      scenes,
 	}
 
-	db.Database.Create(&info)
+	captcha.WithContext(context.Background()).Create(&info)
 
 	return info
 }
 
 // 批量删除过期验证码
-func (s *CaptchaStruct) multiDeleteExpiration() {
-	var info = model.Captcha{}
-
-	db.Database.Delete(info, "expiration < ?", time.Now().Add(1*time.Minute))
+func (s *CaptchaService) multiDeleteExpiration() {
+	captcha.WithContext(context.Background()).Where(captcha.Expiration.Lt(time.Now().Add(1 * time.Minute))).Delete()
 }

@@ -7,5 +7,5 @@ import (
 type AccountController struct {
 }
 
-func (c *AccountController) New(e *gin.Engine) {
+func NewAccountController(e *gin.Engine) {
 }

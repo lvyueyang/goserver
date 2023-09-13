@@ -23,6 +23,6 @@ const (
 )
 
 const (
-	CaptchaWidth  = 100
-	CaptchaHeight = 36
+	CaptchaWidth  = 200
+	CaptchaHeight = 72
 )

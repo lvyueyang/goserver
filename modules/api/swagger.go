@@ -8,6 +8,6 @@ import (
 
 type SwaggerController struct{}
 
-func (c *SwaggerController) New(e *gin.Engine) {
+func NewSwaggerController(e *gin.Engine) {
 	e.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

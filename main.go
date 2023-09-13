@@ -21,8 +21,8 @@ import (
 	"time"
 )
 
-// @title		男生自用 API 接口文档
-// @version	1.0
+//	@title		男生自用 API 接口文档
+//	@version	1.0
 func main() {
 	fmt.Println("Version:", consts.Version)
 	now := time.Now()

@@ -7,7 +7,8 @@ import (
 
 type HomeController struct{}
 
-func (c *HomeController) New(e *gin.Engine) {
+func NewHomeController(e *gin.Engine) {
+	c := &HomeController{}
 	router := e.Group("/")
 	router.GET("/", c.HomePage)
 }

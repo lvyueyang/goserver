@@ -118,18 +118,18 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 验证码类型， 1-手机 2-邮箱 3-图片
+      - description: 验证码类型， 1-手机 2-邮箱
         enum:
         - "1"
         - "2"
-        - "3"
         in: query
         name: type
         required: true
         type: string
-      - description: 手机/邮箱(图片类型可以不传)
+      - description: 手机/邮箱账号
         in: query
         name: value
+        required: true
         type: string
       - description: 使用场景， 1-注册
         enum:
@@ -144,8 +144,32 @@ paths:
         "200":
           description: 请求结果
           schema:
-            type: string
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.LoginSuccessResponse'
+              type: object
       summary: 获取验证码
+      tags:
+      - 验证码
+  /api/captcha/image:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求结果
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 获取图片验证码
       tags:
       - 验证码
   /api/cli/module/create:

@@ -5,6 +5,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"server/config"
+	"server/dal/query"
 )
 
 var Database *gorm.DB
@@ -38,6 +39,8 @@ func Connect() *gorm.DB {
 		fmt.Println("数据库连接失败")
 		panic(err)
 	}
+
+	query.SetDefault(db)
 
 	return db
 }

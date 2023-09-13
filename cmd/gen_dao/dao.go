@@ -3,16 +3,15 @@ package main
 import (
 	"gorm.io/gen"
 	"server/config"
+	"server/dal/model"
 	"server/db"
-	"server/modules/model"
 )
 
 func main() {
 	config.New()
 	// Initialize the generator with configuration
 	g := gen.NewGenerator(gen.Config{
-		OutPath:       "./dao",
-		OutFile:       "dao.go",
+		OutPath:       "./dal/query",
 		Mode:          gen.WithDefaultQuery | gen.WithQueryInterface,
 		FieldNullable: true,
 	})

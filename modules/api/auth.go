@@ -9,13 +9,26 @@ import (
 )
 
 type AuthController struct {
+	service *service.AuthService
 }
 
-func (c *AuthController) New(e *gin.Engine) {
+var authService = service.NewAuthService()
+
+func NewAuthController(e *gin.Engine) {
+	c := &AuthController{
+		service: service.NewAuthService(),
+	}
 	router := e.Group("/api/auth")
-
 	router.POST("/login", c.Login)
+	router.POST("/register", c.Register)
 }
+
+//
+//func (c *AuthController) New(e *gin.Engine) {
+//	router := e.Group("/api/auth")
+//
+//	router.POST("/login", c.Login)
+//}
 
 // Login
 //
@@ -26,13 +39,13 @@ func (c *AuthController) New(e *gin.Engine) {
 //	@Param		req	body		LoginBodyDto							true	"body"
 //	@Success	200	{object}	resp.Result{data=LoginSuccessResponse}	"resp"
 //	@Router		/api/auth/login [post]
-func (c *AuthController) Login(ctx *gin.Context) {
+func (c AuthController) Login(ctx *gin.Context) {
 	var body LoginBodyDto
 	if err := ctx.ShouldBindBodyWith(body, binding.JSON); err != nil {
 		ctx.JSON(resp.ParamErr(valid.ErrTransform(err)))
 		return
 	}
-	token, err := service.AuthService.UsernameAndPasswordLogin(body.Username, body.Password)
+	token, err := authService.UsernameAndPasswordLogin(body.Username, body.Password)
 	if err != nil {
 		ctx.JSON(resp.ParseErr(err))
 	} else {
@@ -49,14 +62,14 @@ func (c *AuthController) Login(ctx *gin.Context) {
 //	@Param		req	body		RegisterBodyDto							true	"body"
 //	@Success	200	{object}	resp.Result{data=LoginSuccessResponse}	"resp"
 //	@Router		/api/auth/register [post]
-func (c *AuthController) Register(ctx *gin.Context) {
+func (c AuthController) Register(ctx *gin.Context) {
 	var body RegisterBodyDto
 	if err := ctx.ShouldBindBodyWith(body, binding.JSON); err != nil {
 		ctx.JSON(resp.ParamErr(valid.ErrTransform(err)))
 		return
 	}
 
-	token, err := service.AuthService.UsernameAndPasswordRegister(body.Email, body.Username, body.Password)
+	token, err := c.service.UsernameAndPasswordRegister(body.Email, body.Username, body.Password)
 	if err != nil {
 		ctx.JSON(resp.ParseErr(err))
 	} else {
