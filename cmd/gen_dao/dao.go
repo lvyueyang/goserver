@@ -12,7 +12,7 @@ func main() {
 	// Initialize the generator with configuration
 	g := gen.NewGenerator(gen.Config{
 		OutPath:       "./dal/query",
-		Mode:          gen.WithDefaultQuery | gen.WithQueryInterface,
+		Mode:          gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface,
 		FieldNullable: true,
 	})
 

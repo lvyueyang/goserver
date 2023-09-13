@@ -5,6 +5,7 @@ import (
 	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/robfig/cron/v3"
 	"server/consts"
 	"server/lib/valid"
 	"server/modules/service"
@@ -24,6 +25,13 @@ func NewCaptchaController(e *gin.Engine) {
 	router.POST("", c.Create)
 	router.GET("/image", c.CreateImage)
 	router.GET("/verify/:id", c.Verify)
+
+	cr := cron.New()
+	// 每隔五分钟清除一次过期验证码
+	cr.AddFunc("@every 5m", func() {
+		c.service.MultiDeleteExpiration()
+	})
+	cr.Start()
 }
 
 // Create
@@ -32,19 +40,19 @@ func NewCaptchaController(e *gin.Engine) {
 //	@Tags		验证码
 //	@Accept		json
 //	@Produce	json
-//	@Param		req	body		CreateCaptchaReqDto			true	"body"
-//	@Success	200	{object}	resp.Result{}	"请求结果"
+//	@Param		req	body		CreateCaptchaReqDto	true	"body"
+//	@Success	200	{object}	resp.Result{}		"请求结果"
 //	@Router		/api/captcha [post]
 func (c *CaptchaController) Create(ctx *gin.Context) {
-	var body CreateCaptchaReqDto
-	if err := ctx.ShouldBindBodyWith(&body, binding.JSON); err != nil {
+	var body = new(CreateCaptchaReqDto)
+	if err := ctx.ShouldBindBodyWith(body, binding.JSON); err != nil {
 		fmt.Printf("%+v\n", err)
 		ctx.JSON(resp.ParamErr(valid.ErrTransform(err)))
 		return
 	}
 
 	// 校验验证码
-	if succ := captcha.Verify(body.CaptchaKey, []byte(body.CaptchaValue)); !succ {
+	if succ := captcha.VerifyString(body.CaptchaKey, body.CaptchaValue); !succ {
 		ctx.JSON(resp.ParamErr("图形验证码不正确"))
 		return
 	}
@@ -61,12 +69,21 @@ func (c *CaptchaController) Create(ctx *gin.Context) {
 //	@Tags		验证码
 //	@Accept		json
 //	@Produce	json
-//	@Success	200	{object}	resp.Result{data=string}	"请求结果"
-//	@Router		/api/captcha/image [get]
+//	@Success	200	{object}	string	"验证码图片"
+//	@Router		/api/captcha/verify/{id} [get]
 func (c *CaptchaController) CreateImage(ctx *gin.Context) {
 	ctx.JSON(resp.Succ(captcha.New()))
 }
 
+// Verify
+//
+//	@Summary	发送验证码
+//	@Tags		验证码
+//	@Accept		json
+//	@Produce	json
+//	@Param		req	body		CreateCaptchaReqDto	true	"body"
+//	@Success	200	{object}	resp.Result{}		"请求结果"
+//	@Router		/api/captcha [post]
 func (c *CaptchaController) Verify(ctx *gin.Context) {
 	id := ctx.Param("id")
 

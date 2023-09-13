@@ -84,8 +84,8 @@ func (s *AuthService) UsernameAndPasswordLogin(username string, password string)
 	if err != nil {
 		return "", errs.CreateClientError("密码错误", nil)
 	}
-	userinfo := s.userService.FindByID(info.UserID)
-	token, err := CreateToken(userinfo, info.Type)
+	userinfo, _ := s.userService.FindByID(info.UserID)
+	token, err := CreateToken(*userinfo, info.Type)
 	if err != nil {
 		return "", errs.CreateServerError("Token 生成失败", err, nil)
 	}

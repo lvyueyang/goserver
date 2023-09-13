@@ -45,7 +45,7 @@ func newAccount(db *gorm.DB, opts ...gen.DOOption) account {
 }
 
 type account struct {
-	accountDo accountDo
+	accountDo
 
 	ALL       field.Asterisk
 	ID        field.Uint
@@ -91,14 +91,6 @@ func (a *account) updateTableName(table string) *account {
 
 	return a
 }
-
-func (a *account) WithContext(ctx context.Context) IAccountDo { return a.accountDo.WithContext(ctx) }
-
-func (a account) TableName() string { return a.accountDo.TableName() }
-
-func (a account) Alias() string { return a.accountDo.Alias() }
-
-func (a account) Columns(cols ...field.Expr) gen.Columns { return a.accountDo.Columns(cols...) }
 
 func (a *account) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 	_f, ok := a.fieldMap[fieldName]

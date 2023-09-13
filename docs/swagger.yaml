@@ -16,6 +16,7 @@ definitions:
         - $ref: '#/definitions/consts.CaptchaType'
         description: 验证码类型， 1-手机 2-邮箱 Enums(1,2)
       value:
+        description: 手机/邮箱账号
         type: string
     required:
     - captcha_key
@@ -178,7 +179,7 @@ paths:
       summary: 发送验证码
       tags:
       - 验证码
-  /api/captcha/image:
+  /api/captcha/verify/{id}:
     get:
       consumes:
       - application/json
@@ -186,14 +187,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: 请求结果
+          description: 验证码图片
           schema:
-            allOf:
-            - $ref: '#/definitions/resp.Result'
-            - properties:
-                data:
-                  type: string
-              type: object
+            type: string
       summary: 获取图片验证码
       tags:
       - 验证码

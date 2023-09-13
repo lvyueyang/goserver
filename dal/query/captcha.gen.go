@@ -43,7 +43,7 @@ func newCaptcha(db *gorm.DB, opts ...gen.DOOption) captcha {
 }
 
 type captcha struct {
-	captchaDo captchaDo
+	captchaDo
 
 	ALL         field.Asterisk
 	ID          field.Uint
@@ -85,14 +85,6 @@ func (c *captcha) updateTableName(table string) *captcha {
 
 	return c
 }
-
-func (c *captcha) WithContext(ctx context.Context) ICaptchaDo { return c.captchaDo.WithContext(ctx) }
-
-func (c captcha) TableName() string { return c.captchaDo.TableName() }
-
-func (c captcha) Alias() string { return c.captchaDo.Alias() }
-
-func (c captcha) Columns(cols ...field.Expr) gen.Columns { return c.captchaDo.Columns(cols...) }
 
 func (c *captcha) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 	_f, ok := c.fieldMap[fieldName]

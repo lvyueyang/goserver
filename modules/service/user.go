@@ -2,11 +2,14 @@ package service
 
 import (
 	"server/dal/model"
+	"server/dal/query"
 	"server/db"
 )
 
 type UserService struct {
 }
+
+var user = query.User
 
 func NewUserService() *UserService {
 	return new(UserService)
@@ -25,19 +28,17 @@ type CreateUser struct {
 	Avatar string
 }
 
-func (s *UserService) FindByID(id uint) model.User {
-	user := model.User{}
-	db.Database.First(&user, "id = ?", id)
-	return user
+func (s *UserService) FindByID(id uint) (*model.User, error) {
+	return user.Where(user.ID.Eq(id)).First()
 }
 
-func (s *UserService) Create(u CreateUser) model.User {
-	user := model.User{
+func (s *UserService) Create(u CreateUser) *model.User {
+	info := &model.User{
 		Name:   u.Name,
 		Age:    u.Age,
 		Email:  u.Email,
 		Avatar: u.Avatar,
 	}
-	db.Database.Create(&user)
-	return user
+	user.Create(info)
+	return info
 }

@@ -161,7 +161,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/captcha/image": {
+        "/api/captcha/verify/{id}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -175,21 +175,9 @@ const docTemplate = `{
                 "summary": "获取图片验证码",
                 "responses": {
                     "200": {
-                        "description": "请求结果",
+                        "description": "验证码图片",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/resp.Result"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            ]
+                            "type": "string"
                         }
                     }
                 }
@@ -296,6 +284,7 @@ const docTemplate = `{
                     ]
                 },
                 "value": {
+                    "description": "手机/邮箱账号",
                     "type": "string"
                 }
             }

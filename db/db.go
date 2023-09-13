@@ -5,6 +5,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"server/config"
+	"server/dal/model"
 	"server/dal/query"
 )
 
@@ -41,6 +42,14 @@ func Connect() *gorm.DB {
 	}
 
 	query.SetDefault(db)
+
+	models := []any{model.Account{}, model.Account{}, model.Captcha{}}
+	for _, m := range models {
+		if err := db.AutoMigrate(m); err != nil {
+			fmt.Println("初始化数据库表失败")
+			panic(err)
+		}
+	}
 
 	return db
 }

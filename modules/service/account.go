@@ -24,7 +24,7 @@ func (s *AccountService) CreateNormal(userID uint, username, password string) (m
 		Password: password,
 		UserID:   userID,
 	}
-	if err := account.WithContext(context.Background()).Create(&info); err != nil {
+	if err := account.Create(&info); err != nil {
 		return info, err
 	}
 
@@ -64,17 +64,17 @@ func (s *AccountService) CreateWxMp(openid string) (model.User, error) {
 
 // UseEmailFindOne 使用邮箱查账号
 func (s *AccountService) UseEmailFindOne(email string) (info *model.Account, err error) {
-	return account.WithContext(context.Background()).Where(account.Email.Eq(email)).First()
+	return account.Where(account.Email.Eq(email)).First()
 }
 
 // UseUsernameFindOne 使用用户名查账号
 func (s *AccountService) UseUsernameFindOne(username string) (info *model.Account, err error) {
-	return account.WithContext(context.Background()).Where(account.Username.Eq(username)).First()
+	return account.Where(account.Username.Eq(username)).First()
 }
 
 // UseWxMpOpenIDFindOne 使用微信 openid 查账号
 func (s *AccountService) UseWxMpOpenIDFindOne(openid string) (info *model.Account, err error) {
-	return account.WithContext(context.Background()).Where(account.WxOpenId.Eq(openid)).First()
+	return account.Where(account.WxOpenId.Eq(openid)).First()
 
 }
 

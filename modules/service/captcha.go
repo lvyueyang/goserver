@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"server/consts"
 	"server/dal/model"
 	"server/dal/query"
@@ -18,9 +17,8 @@ func NewCaptchaService() *CaptchaService {
 	return new(CaptchaService)
 }
 
-func (s *CaptchaService) FindByID(id uint) model.Captcha {
-	info, _ := captcha.WithContext(context.Background()).Where(captcha.ID.Eq(id)).First()
-	return *info
+func (s *CaptchaService) FindByID(id uint) (*model.Captcha, error) {
+	return captcha.Where(captcha.ID.Eq(id)).First()
 }
 
 // ValidateCode 验证手机/邮箱验证码
@@ -39,7 +37,7 @@ func validateCode(info model.Captcha, code string) (bool, error) {
 
 // Validate 验证手机/邮箱验证码
 func (s *CaptchaService) Validate(current, code string, scenes consts.CaptchaScenes) (bool, error) {
-	info, err := captcha.WithContext(context.Background()).Order(captcha.CreatedAt.Desc()).First()
+	info, err := captcha.Order(captcha.CreatedAt.Desc()).First()
 
 	if err != nil {
 		return false, errs.CreateClientError("验证码不存在", info)
@@ -47,7 +45,7 @@ func (s *CaptchaService) Validate(current, code string, scenes consts.CaptchaSce
 	return validateCode(*info, code)
 }
 
-func (s *CaptchaService) Create(currentType consts.CaptchaType, current string, scenes consts.CaptchaScenes) model.Captcha {
+func (s *CaptchaService) Create(currentType consts.CaptchaType, current string, scenes consts.CaptchaScenes) (*model.Captcha, error) {
 	code := utils.GenCaptcha()
 	info := model.Captcha{
 		CurrentType: currentType,
@@ -58,12 +56,14 @@ func (s *CaptchaService) Create(currentType consts.CaptchaType, current string, 
 		Scenes:      scenes,
 	}
 
-	captcha.WithContext(context.Background()).Create(&info)
+	if err := query.Captcha.Create(&info); err != nil {
+		return new(model.Captcha), err
+	}
 
-	return info
+	return &info, nil
 }
 
-// 批量删除过期验证码
-func (s *CaptchaService) multiDeleteExpiration() {
-	captcha.WithContext(context.Background()).Where(captcha.Expiration.Lt(time.Now().Add(1 * time.Minute))).Delete()
+// MultiDeleteExpiration 批量删除过期验证码
+func (s *CaptchaService) MultiDeleteExpiration() {
+	captcha.Where(captcha.Expiration.Lt(time.Now().Add(1 * time.Minute))).Delete()
 }
