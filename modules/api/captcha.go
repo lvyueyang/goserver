@@ -25,11 +25,13 @@ func NewCaptchaController(e *gin.Engine) {
 	router.POST("", c.Create)
 	router.GET("/image", c.CreateImage)
 	router.GET("/verify/:id", c.Verify)
+	router.GET("/clear", c.Clear)
 
+	c.service.ClearExpiration()
 	cr := cron.New()
 	// 每隔五分钟清除一次过期验证码
 	cr.AddFunc("@every 5m", func() {
-		c.service.MultiDeleteExpiration()
+		c.service.ClearExpiration()
 	})
 	cr.Start()
 }
@@ -51,11 +53,11 @@ func (c *CaptchaController) Create(ctx *gin.Context) {
 		return
 	}
 
-	// 校验验证码
-	if succ := captcha.VerifyString(body.CaptchaKey, body.CaptchaValue); !succ {
-		ctx.JSON(resp.ParamErr("图形验证码不正确"))
-		return
-	}
+	//// 校验验证码
+	//if succ := captcha.VerifyString(body.CaptchaKey, body.CaptchaValue); !succ {
+	//	ctx.JSON(resp.ParamErr("图形验证码不正确"))
+	//	return
+	//}
 
 	// 创建邮箱验证码
 	c.service.Create(body.Type, body.Value, body.Scenes)
@@ -77,7 +79,7 @@ func (c *CaptchaController) CreateImage(ctx *gin.Context) {
 
 // Verify
 //
-//	@Summary	发送验证码
+//	@Summary	获取验证码图片
 //	@Tags		验证码
 //	@Accept		json
 //	@Produce	json
@@ -88,6 +90,18 @@ func (c *CaptchaController) Verify(ctx *gin.Context) {
 	id := ctx.Param("id")
 
 	captcha.WriteImage(ctx.Writer, id, consts.CaptchaWidth, consts.CaptchaHeight)
+}
+
+// Clear
+//
+//	@Summary	清除过期验证码
+//	@Tags		验证码
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	resp.Result{}	"请求结果"
+//	@Router		/api/captcha/clear [get]
+func (c *CaptchaController) Clear(ctx *gin.Context) {
+	c.service.ClearExpiration()
 }
 
 type CreateCaptchaReqDto struct {

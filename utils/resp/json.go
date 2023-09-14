@@ -1,9 +1,7 @@
 package resp
 
 import (
-	"errors"
 	"net/http"
-	"server/lib/errs"
 )
 
 const (
@@ -56,12 +54,6 @@ func ServerErr(data any, msg string, code int) (int, Result) {
 	return http.StatusInternalServerError, Err(data, msg, code)
 }
 
-var se = new(errs.ServerError)
-
 func ParseErr(err error) (int, Result) {
-	if errors.As(err, &se) {
-		return ServerErr(nil, "服务端错误", http.StatusInternalServerError)
-	} else {
-		return ServerErr(err, err.Error(), http.StatusBadRequest)
-	}
+	return ServerErr(err, err.Error(), http.StatusBadRequest)
 }

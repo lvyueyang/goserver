@@ -1,16 +1,13 @@
 package service
 
 import (
-	"context"
 	"server/consts"
+	"server/dal/dao"
 	"server/dal/model"
-	"server/dal/query"
 	"server/lib/errs"
 )
 
 type AccountService struct{}
-
-var account = query.Account
 
 func NewAccountService() *AccountService {
 	return new(AccountService)
@@ -24,7 +21,7 @@ func (s *AccountService) CreateNormal(userID uint, username, password string) (m
 		Password: password,
 		UserID:   userID,
 	}
-	if err := account.Create(&info); err != nil {
+	if err := dao.Account.Create(&info); err != nil {
 		return info, err
 	}
 
@@ -64,32 +61,33 @@ func (s *AccountService) CreateWxMp(openid string) (model.User, error) {
 
 // UseEmailFindOne 使用邮箱查账号
 func (s *AccountService) UseEmailFindOne(email string) (info *model.Account, err error) {
-	return account.Where(account.Email.Eq(email)).First()
+	return dao.Account.Where(dao.Account.Email.Eq(email)).First()
 }
 
 // UseUsernameFindOne 使用用户名查账号
 func (s *AccountService) UseUsernameFindOne(username string) (info *model.Account, err error) {
-	return account.Where(account.Username.Eq(username)).First()
+	return dao.Account.Where(dao.Account.Username.Eq(username)).First()
 }
 
 // UseWxMpOpenIDFindOne 使用微信 openid 查账号
 func (s *AccountService) UseWxMpOpenIDFindOne(openid string) (info *model.Account, err error) {
-	return account.Where(account.WxOpenId.Eq(openid)).First()
+	return dao.Account.Where(dao.Account.WxOpenId.Eq(openid)).First()
 
 }
 
 func createUserAccount(userInfo *model.User, accountInfo *model.Account) error {
-	err := query.Q.Transaction(func(tx *query.Query) error {
-
-		if err := tx.User.WithContext(context.Background()).Create(userInfo); err != nil {
+	err := dao.Q.Transaction(func(tx *dao.Query) error {
+		if err := tx.User.Create(userInfo); err != nil {
 			return errs.CreateServerError("创建用户失败", err, userInfo)
 		}
 		accountInfo.UserID = userInfo.ID
-		if err := tx.Account.WithContext(context.Background()).Create(accountInfo); err != nil {
+		if err := tx.Account.Create(accountInfo); err != nil {
 			return errs.CreateServerError("创建用户账号失败", err, accountInfo)
 		}
-
 		return nil
 	})
-	return errs.CreateServerError("创建用户账号事务失败", err, nil)
+	if err != nil {
+		return errs.CreateServerError("创建用户账号事务失败", err, nil)
+	}
+	return nil
 }

@@ -2,11 +2,13 @@ package db
 
 import (
 	"fmt"
-	"gorm.io/driver/postgres"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"reflect"
 	"server/config"
+	"server/dal/dao"
 	"server/dal/model"
-	"server/dal/query"
+	"time"
 )
 
 var Database *gorm.DB
@@ -15,41 +17,51 @@ func New() {
 	Database = Connect()
 }
 
-func InitTable(dst any) {
-	err := Database.AutoMigrate(dst)
-	if err != nil {
-		fmt.Println("初始化数据库表失败")
-		panic(err)
-	}
-}
-
 // Connect 数据库连接
 func Connect() *gorm.DB {
+	fmt.Println("数据库连接中")
+	now := time.Now()
 	conf := config.Config.Db
+	//dsn := fmt.Sprintf(
+	//	"host=%v user=%v password=%v port=%v dbname=%v sslmode=disable TimeZone=Asia/Shanghai",
+	//	conf.Host, conf.User, conf.Password, conf.Port, conf.Dbname,
+	//)
 	dsn := fmt.Sprintf(
-		"host=%v user=%v password=%v port=%v dbname=%v sslmode=disable TimeZone=Asia/Shanghai",
-		conf.Host, conf.User, conf.Password, conf.Port, conf.Dbname,
+		"%v:%v@tcp(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local",
+		conf.User, conf.Password, conf.Host, conf.Port, conf.Dbname,
 	)
-	fmt.Println("dsn", dsn)
 
-	db, err := gorm.Open(postgres.New(postgres.Config{
-		DSN: dsn,
-	}), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		fmt.Println("数据库连接失败")
 		panic(err)
 	}
 
-	query.SetDefault(db)
+	dao.SetDefault(db)
 
-	models := []any{model.Account{}, model.Account{}, model.Captcha{}}
+	models := []any{model.User{}, model.Account{}, model.Captcha{}}
 	for _, m := range models {
+		structType := reflect.TypeOf(m)
+
 		if err := db.AutoMigrate(m); err != nil {
-			fmt.Println("初始化数据库表失败")
+			fmt.Printf("表 %+v 初始化失败\n", structType.Name())
 			panic(err)
+		} else {
+			fmt.Printf("表 %+v 初始化成功\n", structType.Name())
 		}
 	}
-
+	fmt.Printf("数据库连接成功，耗时 %+v\n", time.Now().Sub(now))
+	sqlDB, _ := db.DB()
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	fmt.Printf("\n%+v\n", sqlDB.Stats())
 	return db
+}
+
+func Close() {
+	sqlDB, _ := Database.DB()
+	fmt.Printf("数据库关闭中\n%+v\n", sqlDB.Stats())
+	sqlDB.Close()
+	fmt.Printf("数据库连接已关闭\n%+v\n", sqlDB.Stats())
 }

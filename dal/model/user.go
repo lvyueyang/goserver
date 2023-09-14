@@ -8,7 +8,7 @@ type User struct {
 	gorm.Model
 	Name    string `json:"name"`
 	Age     uint32 `json:"age"`
-	Email   string `json:"email" gorm:"uniqueIndex"`
+	Email   string `json:"email" gorm:"unique"`
 	Avatar  string `json:"avatar"`
 	Account []Account
 }

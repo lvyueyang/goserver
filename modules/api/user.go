@@ -34,7 +34,7 @@ func (c *UserController) New(e *gin.Engine) {
 //	@Success	200	{object}	string	"resp"
 //	@Router		/admin/api/user/list [get]
 func (c *UserController) FindList(ctx *gin.Context) {
-	list := c.service.GetList()
+	list, _ := c.service.FindList()
 	ctx.JSON(resp.Succ(list))
 }
 

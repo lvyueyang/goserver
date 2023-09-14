@@ -1,15 +1,14 @@
 package service
 
 import (
+	"fmt"
 	"server/consts"
+	"server/dal/dao"
 	"server/dal/model"
-	"server/dal/query"
 	"server/lib/errs"
 	"server/utils"
 	"time"
 )
-
-var captcha = query.Captcha
 
 type CaptchaService struct{}
 
@@ -18,7 +17,7 @@ func NewCaptchaService() *CaptchaService {
 }
 
 func (s *CaptchaService) FindByID(id uint) (*model.Captcha, error) {
-	return captcha.Where(captcha.ID.Eq(id)).First()
+	return dao.Captcha.Where(dao.Captcha.ID.Eq(id)).First()
 }
 
 // ValidateCode 验证手机/邮箱验证码
@@ -37,7 +36,7 @@ func validateCode(info model.Captcha, code string) (bool, error) {
 
 // Validate 验证手机/邮箱验证码
 func (s *CaptchaService) Validate(current, code string, scenes consts.CaptchaScenes) (bool, error) {
-	info, err := captcha.Order(captcha.CreatedAt.Desc()).First()
+	info, err := dao.Captcha.Order(dao.Captcha.CreatedAt.Desc()).First()
 
 	if err != nil {
 		return false, errs.CreateClientError("验证码不存在", info)
@@ -56,14 +55,15 @@ func (s *CaptchaService) Create(currentType consts.CaptchaType, current string, 
 		Scenes:      scenes,
 	}
 
-	if err := query.Captcha.Create(&info); err != nil {
+	if err := dao.Captcha.Create(&info); err != nil {
 		return new(model.Captcha), err
 	}
 
 	return &info, nil
 }
 
-// MultiDeleteExpiration 批量删除过期验证码
-func (s *CaptchaService) MultiDeleteExpiration() {
-	captcha.Where(captcha.Expiration.Lt(time.Now().Add(1 * time.Minute))).Delete()
+// ClearExpiration 清理过期验证码
+func (s *CaptchaService) ClearExpiration() {
+	dao.Captcha.Where(dao.Captcha.Expiration.Lt(time.Now().Add(1 * time.Minute))).Delete()
+	fmt.Println("已清除过期验证码")
 }

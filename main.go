@@ -21,8 +21,8 @@ import (
 	"time"
 )
 
-//	@title		男生自用 API 接口文档
-//	@version	1.0
+// @title		男生自用 API 接口文档
+// @version	1.0
 func main() {
 	fmt.Println("Version:", consts.Version)
 	now := time.Now()
@@ -43,17 +43,18 @@ func main() {
 
 	// 数据库
 	db.New()
+	defer db.Close()
 
 	// gin
 	router := gin.New()
 	// 全局中间件
 	router.Use(middleware.RequestLogger(), gin.Recovery())
 
-	// 启动
-	app.New(router)
-
 	// 验证器
 	valid.New()
+
+	// 启动
+	app.New(router)
 
 	srv := &http.Server{
 		Addr:    ":" + strconv.Itoa(config.Config.Port),
@@ -87,20 +88,4 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("服务退出")
-
-	//go func() {
-	//	fmt.Println("\nAPI", "http://127.0.0.1:"+strconv.Itoa(config.Config.Port))
-	//	fmt.Println("Swagger: ", "http://127.0.0.1:"+strconv.Itoa(config.Config.Port)+"/swagger/index.html")
-	//	//fmt.Printf("配置文件加载成功 %+v\n", config.Config)
-	//	fmt.Println("当前环境", envName)
-	//	fmt.Println("启动耗时: ", time.Now().Sub(now))
-	//}()
-	//
-	//// 监听端口
-	//err := router.Run(":" + strconv.Itoa(config.Config.Port))
-	//
-	//if err != nil {
-	//	fmt.Println("启动失败!")
-	//	panic(err)
-	//}
 }

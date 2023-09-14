@@ -161,6 +161,28 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/captcha/clear": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "验证码"
+                ],
+                "summary": "清除验证码",
+                "responses": {
+                    "200": {
+                        "description": "请求结果",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Result"
+                        }
+                    }
+                }
+            }
+        },
         "/api/captcha/verify/{id}": {
             "get": {
                 "consumes": [

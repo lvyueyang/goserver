@@ -2,10 +2,12 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 	"server/config"
 	"server/consts"
+	"server/dal/dao"
 	"server/dal/model"
 	"server/lib/errs"
 	"time"
@@ -41,11 +43,13 @@ func (s *AuthService) UsernameAndPasswordRegister(email, username, password stri
 		"username": username,
 		"password": password,
 	}
+	fmt.Println("accountService", s.accountService)
+
 	// 验证用户名和邮箱是否已被使用
-	if info, _ := s.accountService.UseEmailFindOne(email); info.ID != 0 {
+	if _, err := dao.Account.Where(dao.Account.Email.Eq(email)).First(); err == nil {
 		return "", &errs.ClientError{Msg: "邮箱已存在", Info: nil}
 	}
-	if info, _ := s.accountService.UseUsernameFindOne(username); info.ID != 0 {
+	if _, err := dao.Account.Where(dao.Account.Username.Eq(username)).First(); err == nil {
 		return "", &errs.ClientError{Msg: "用户名已存在", Info: nil}
 	}
 

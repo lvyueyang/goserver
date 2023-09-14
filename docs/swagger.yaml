@@ -179,6 +179,20 @@ paths:
       summary: 发送验证码
       tags:
       - 验证码
+  /api/captcha/clear:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求结果
+          schema:
+            $ref: '#/definitions/resp.Result'
+      summary: 清除验证码
+      tags:
+      - 验证码
   /api/captcha/verify/{id}:
     get:
       consumes:

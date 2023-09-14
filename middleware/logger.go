@@ -96,7 +96,7 @@ func loggerMiddleware() gin.HandlerFunc {
 					),
 				)
 			} else {
-				slog.Error("RequestSuccess",
+				slog.Error("RequestError",
 					slog.Group("info",
 						slog.String("path", param.Path),
 						slog.String("method", param.Method),

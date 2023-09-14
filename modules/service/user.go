@@ -1,24 +1,19 @@
 package service
 
 import (
+	"server/dal/dao"
 	"server/dal/model"
-	"server/dal/query"
-	"server/db"
 )
 
 type UserService struct {
 }
 
-var user = query.User
-
 func NewUserService() *UserService {
 	return new(UserService)
 }
 
-func (s *UserService) GetList() []model.User {
-	var list []model.User
-	db.Database.Find(&list)
-	return list
+func (s *UserService) FindList() ([]*model.User, error) {
+	return dao.User.Find()
 }
 
 type CreateUser struct {
@@ -29,7 +24,7 @@ type CreateUser struct {
 }
 
 func (s *UserService) FindByID(id uint) (*model.User, error) {
-	return user.Where(user.ID.Eq(id)).First()
+	return dao.User.Where(dao.User.ID.Eq(id)).First()
 }
 
 func (s *UserService) Create(u CreateUser) *model.User {
@@ -39,6 +34,6 @@ func (s *UserService) Create(u CreateUser) *model.User {
 		Email:  u.Email,
 		Avatar: u.Avatar,
 	}
-	user.Create(info)
+	dao.User.Create(info)
 	return info
 }
