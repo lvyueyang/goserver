@@ -139,7 +139,7 @@ const docTemplate = `{
                 "tags": [
                     "验证码"
                 ],
-                "summary": "发送验证码",
+                "summary": "获取验证码图片",
                 "parameters": [
                     {
                         "description": "body",
@@ -172,7 +172,16 @@ const docTemplate = `{
                 "tags": [
                     "验证码"
                 ],
-                "summary": "清除验证码",
+                "summary": "清除过期验证码",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authentication token",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "请求结果",
@@ -334,6 +343,11 @@ const docTemplate = `{
         },
         "api.RegisterBodyDto": {
             "type": "object",
+            "required": [
+                "email",
+                "password",
+                "username"
+            ],
             "properties": {
                 "captcha": {
                     "description": "邮箱验证码",

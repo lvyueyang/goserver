@@ -8,6 +8,7 @@ import (
 	"github.com/robfig/cron/v3"
 	"server/consts"
 	"server/lib/valid"
+	"server/middleware"
 	"server/modules/service"
 	"server/utils/resp"
 )
@@ -25,7 +26,7 @@ func NewCaptchaController(e *gin.Engine) {
 	router.POST("", c.Create)
 	router.GET("/image", c.CreateImage)
 	router.GET("/verify/:id", c.Verify)
-	router.GET("/clear", c.Clear)
+	router.GET("/clear", middleware.Auth(), c.Clear)
 
 	c.service.ClearExpiration()
 	cr := cron.New()
@@ -98,7 +99,8 @@ func (c *CaptchaController) Verify(ctx *gin.Context) {
 //	@Tags		验证码
 //	@Accept		json
 //	@Produce	json
-//	@Success	200	{object}	resp.Result{}	"请求结果"
+//	@Param		X-Auth-Token	header		string			true	"Authentication token"
+//	@Success	200				{object}	resp.Result{}	"请求结果"
 //	@Router		/api/captcha/clear [get]
 func (c *CaptchaController) Clear(ctx *gin.Context) {
 	c.service.ClearExpiration()

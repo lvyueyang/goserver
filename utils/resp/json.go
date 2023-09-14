@@ -54,6 +54,11 @@ func ServerErr(data any, msg string, code int) (int, Result) {
 	return http.StatusInternalServerError, Err(data, msg, code)
 }
 
+// AuthErr 认证错误
+func AuthErr(msg string) (int, Result) {
+	return http.StatusUnauthorized, Err(nil, msg, http.StatusUnauthorized)
+}
+
 func ParseErr(err error) (int, Result) {
 	return ServerErr(err, err.Error(), http.StatusBadRequest)
 }

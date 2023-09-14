@@ -1,16 +1,13 @@
 package service
 
 import (
-	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
-	"server/config"
 	"server/consts"
 	"server/dal/dao"
 	"server/dal/model"
 	"server/lib/errs"
-	"time"
+	"server/utils"
 )
 
 type AuthService struct {
@@ -69,7 +66,7 @@ func (s *AuthService) UsernameAndPasswordRegister(email, username, password stri
 		userInfo = result
 	}
 
-	token, err := CreateToken(userInfo, consts.EmailAccountType)
+	token, err := utils.CreateUserToken(userInfo, consts.EmailAccountType)
 
 	if err != nil {
 		errInfo := map[string]any{"userInfo": userInfo, "opt": opt}
@@ -89,7 +86,7 @@ func (s *AuthService) UsernameAndPasswordLogin(username string, password string)
 		return "", errs.CreateClientError("密码错误", nil)
 	}
 	userinfo, _ := s.userService.FindByID(info.UserID)
-	token, err := CreateToken(*userinfo, info.Type)
+	token, err := utils.CreateUserToken(*userinfo, info.Type)
 	if err != nil {
 		return "", errs.CreateServerError("Token 生成失败", err, nil)
 	}
@@ -97,48 +94,4 @@ func (s *AuthService) UsernameAndPasswordLogin(username string, password string)
 }
 
 func (s *AuthService) Register() {
-}
-
-type Claims struct {
-	UserID      uint               `json:"user_id"`
-	AccountType consts.AccountType `json:"account_type"`
-	jwt.RegisteredClaims
-}
-
-var HmacSecret = []byte("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJuYmYiOjE0NDQ0Nzg0MDB9.u1riaD1rW97opCoAuRCTy4w58Br-Zk-bh7vLiRIsrpU")
-
-func CreateToken(user model.User, accountType consts.AccountType) (string, error) {
-	now := time.Now()
-	expireTime := now.Add(7 * 24 * time.Hour)
-	claims := Claims{
-		user.ID,
-		accountType,
-		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expireTime),
-			Issuer:    config.Config.Auth.TokenSecret,
-		},
-	}
-
-	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	token, err := tokenClaims.SigningString()
-	if err != nil {
-		return "", &errs.ServerError{Msg: "Token 生成失败", Err: err, Info: user}
-	}
-	return token, nil
-}
-
-func ParseToken(token string) (*Claims, error) {
-	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return HmacSecret, nil
-	})
-	if err != nil {
-		return nil, &errs.ServerError{Msg: "Token 解析失败", Err: err, Info: token}
-	}
-	if tokenClaims != nil {
-		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
-			return claims, nil
-		}
-	}
-	return nil, &errs.ServerError{Msg: "Token 解析失败", Err: errors.New(tokenClaims.Raw), Info: tokenClaims}
 }
