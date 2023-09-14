@@ -13,13 +13,21 @@ output = "/Users/lyy/code/project/goserver/logs"
 tokenSecret = "ajax.red"
 
 [db]
-host = "127.0.0.1"
-user  = "lvyueyang"
-password = "Lv12345678"
-port = 3306
-dbname = "cms_dev"
+#host = "47.100.38.198"
+#user  = "lvyueyang"
+#password = "ciErDe5GF92cCbh"
+#port = 5433
+#dbname = "db41ff70fd53de4812ab44957ce5ddeb95cms_dev"
+
 #host = "localhost"
 #user  = "postgres"
 #password = "123456"
 #port = 5432
 #dbname = "cms_dev"
+
+host = "localhost"
+user  = "lvyueyang"
+password = "Lv12345678"
+port = 3306
+dbname = "cms_dev"
+
