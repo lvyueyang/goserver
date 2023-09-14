@@ -13,6 +13,15 @@ import (
 
 var Database *gorm.DB
 
+// 初始化数据库表
+var models = []any{
+	model.User{},
+	model.Account{},
+	model.Captcha{},
+	model.AdminUser{},
+	model.AdminRole{},
+}
+
 func New() {
 	Database = Connect()
 }
@@ -41,7 +50,6 @@ func Connect() *gorm.DB {
 
 	dao.SetDefault(db)
 
-	models := []any{model.User{}, model.Account{}, model.Captcha{}}
 	for _, m := range models {
 		structType := reflect.TypeOf(m)
 
