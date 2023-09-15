@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"server/config"
 	"server/dal/dao"
 	"server/utils"
 	"server/utils/resp"
@@ -24,7 +25,7 @@ func isLogin(c *gin.Context) error {
 	if token == "" {
 		return errors.New("未登录")
 	}
-	if info, err := utils.ParseUserToken(token); err != nil {
+	if info, err := utils.ParseUserToken(token, config.Config.Auth.TokenSecret); err != nil {
 		return errors.New("身份过期")
 	} else {
 		userId := info.User.Id

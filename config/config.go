@@ -12,7 +12,8 @@ type LogConfig struct {
 }
 
 type AuthConfig struct {
-	TokenSecret string // token 秘钥
+	TokenSecret      string // token 秘钥
+	AdminTokenSecret string // 管理端 token 秘钥
 }
 
 type DBConfig struct {

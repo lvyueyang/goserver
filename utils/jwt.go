@@ -19,9 +19,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-var HmacSecret = []byte("aaaaaaaaaaaa")
-
-func CreateUserToken(user model.User, accountType consts.AccountType) (string, error) {
+func CreateUserToken(user model.User, accountType consts.AccountType, secret string) (string, error) {
 	now := time.Now()
 	expireTime := now.Add(7 * 24 * time.Hour)
 	userClaims := Claims{
@@ -36,16 +34,16 @@ func CreateUserToken(user model.User, accountType consts.AccountType) (string, e
 
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, userClaims)
 
-	token, err := tokenClaims.SignedString(HmacSecret)
+	token, err := tokenClaims.SignedString(secret)
 	if err != nil {
 		return "", errs.CreateServerError("Token 生成失败", err, user)
 	}
 	return token, nil
 }
 
-func ParseUserToken(token string) (*Claims, error) {
+func ParseUserToken(token string, secret string) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return HmacSecret, nil
+		return secret, nil
 	})
 	if err != nil {
 		return nil, errs.CreateServerError("Token 错误", err, token)

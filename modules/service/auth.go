@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
+	"server/config"
 	"server/consts"
 	"server/dal/dao"
 	"server/dal/model"
@@ -66,7 +67,7 @@ func (s *AuthService) UsernameAndPasswordRegister(email, username, password stri
 		userInfo = result
 	}
 
-	token, err := utils.CreateUserToken(userInfo, consts.EmailAccountType)
+	token, err := utils.CreateUserToken(userInfo, consts.EmailAccountType, config.Config.Auth.TokenSecret)
 
 	if err != nil {
 		errInfo := map[string]any{"userInfo": userInfo, "opt": opt}
@@ -86,7 +87,7 @@ func (s *AuthService) UsernameAndPasswordLogin(username string, password string)
 		return "", errs.CreateClientError("密码错误", nil)
 	}
 	userinfo, _ := s.userService.FindByID(info.UserID)
-	token, err := utils.CreateUserToken(*userinfo, info.Type)
+	token, err := utils.CreateUserToken(*userinfo, info.Type, config.Config.Auth.TokenSecret)
 	if err != nil {
 		return "", errs.CreateServerError("Token 生成失败", err, nil)
 	}

@@ -10,7 +10,8 @@ output = "/Users/lyy/code/project/goserver/logs"
 
 # 用户认证
 [auth]
-tokenSecret = "ajax.red"
+tokenSecret = "ajax2023"
+adminTokenSecret = "ajaxadmin2023"
 
 [db]
 #host = "47.100.38.198"
