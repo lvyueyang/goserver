@@ -13,8 +13,8 @@ import (
 
 var Database *gorm.DB
 
-// 初始化数据库表
-var models = []any{
+// Models 数据库表
+var Models = []any{
 	model.User{},
 	model.Account{},
 	model.Captcha{},
@@ -50,7 +50,7 @@ func Connect() *gorm.DB {
 
 	dao.SetDefault(db)
 
-	for _, m := range models {
+	for _, m := range Models {
 		structType := reflect.TypeOf(m)
 
 		if err := db.AutoMigrate(m); err != nil {

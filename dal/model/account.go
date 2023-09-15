@@ -1,15 +1,14 @@
 package model
 
 import (
-	"gorm.io/gorm"
 	"server/consts"
 )
 
 type Account struct {
-	gorm.Model
+	BaseModel
 	Type      consts.AccountType `json:"type"`
 	Username  string             `json:"username" gorm:"unique"`
-	Password  string             `json:"password"`
+	Password  string             `json:"_"`
 	Email     string             `json:"email" gorm:"unique"`
 	WxOpenId  string             `json:"wx_open_id"`
 	WxUnionId string             `json:"wx_union_id"`

@@ -1,5 +1,7 @@
 package errs
 
+import "fmt"
+
 // ServerError 服务端错误, 不向用户展示错误详情
 type ServerError struct {
 	Msg  string
@@ -27,6 +29,8 @@ func (e *ClientError) Error() string {
 
 // CreateServerError 创建服务端错误
 func CreateServerError(msg string, err error, info any) *ServerError {
+	fmt.Printf("ServerError: %+v\n", err)
+	fmt.Printf("ServerErrorInfo: %+v\n", info)
 	return &ServerError{
 		Msg:  msg,
 		Err:  err,

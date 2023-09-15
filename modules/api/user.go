@@ -16,12 +16,7 @@ func NewUserController(e *gin.Engine) {
 	c := &UserController{
 		service: service.NewUserService(),
 	}
-	admin := e.Group("/admin/api/user")
-	admin.GET("/list", c.FindList)
-}
-
-func (c *UserController) New(e *gin.Engine) {
-	admin := e.Group("/admin/api/user")
+	admin := e.Group("/api/admin/user")
 	admin.GET("/list", c.FindList)
 }
 
@@ -32,7 +27,7 @@ func (c *UserController) New(e *gin.Engine) {
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	string	"resp"
-//	@Router		/admin/api/user/list [get]
+//	@Router		/api/admin/user/list [get]
 func (c *UserController) FindList(ctx *gin.Context) {
 	list, _ := c.service.FindList()
 	ctx.JSON(resp.Succ(list))

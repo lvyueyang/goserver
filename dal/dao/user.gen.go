@@ -35,6 +35,7 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.Age = field.NewUint32(tableName, "age")
 	_user.Email = field.NewString(tableName, "email")
 	_user.Avatar = field.NewString(tableName, "avatar")
+	_user.Status = field.NewInt8(tableName, "status")
 	_user.Account = userHasManyAccount{
 		db: db.Session(&gorm.Session{}),
 
@@ -58,6 +59,7 @@ type user struct {
 	Age       field.Uint32
 	Email     field.String
 	Avatar    field.String
+	Status    field.Int8
 	Account   userHasManyAccount
 
 	fieldMap map[string]field.Expr
@@ -83,6 +85,7 @@ func (u *user) updateTableName(table string) *user {
 	u.Age = field.NewUint32(table, "age")
 	u.Email = field.NewString(table, "email")
 	u.Avatar = field.NewString(table, "avatar")
+	u.Status = field.NewInt8(table, "status")
 
 	u.fillFieldMap()
 
@@ -99,7 +102,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 9)
+	u.fieldMap = make(map[string]field.Expr, 10)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["created_at"] = u.CreatedAt
 	u.fieldMap["updated_at"] = u.UpdatedAt
@@ -108,6 +111,7 @@ func (u *user) fillFieldMap() {
 	u.fieldMap["age"] = u.Age
 	u.fieldMap["email"] = u.Email
 	u.fieldMap["avatar"] = u.Avatar
+	u.fieldMap["status"] = u.Status
 
 }
 

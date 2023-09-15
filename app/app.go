@@ -18,4 +18,7 @@ func New(r *gin.Engine) {
 	api.NewAccountController(r)
 	api.NewAuthController(r)
 	api.NewCaptchaController(r)
+
+	api.NewAdminUserController(r)
+	api.NewAdminAuthController(r)
 }

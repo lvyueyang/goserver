@@ -12,8 +12,6 @@ type AuthController struct {
 	service *service.AuthService
 }
 
-var authService = service.NewAuthService()
-
 func NewAuthController(e *gin.Engine) {
 	c := &AuthController{
 		service: service.NewAuthService(),
@@ -36,20 +34,20 @@ func NewAuthController(e *gin.Engine) {
 //	@Tags		用户
 //	@Accept		json
 //	@Produce	json
-//	@Param		req	body		LoginBodyDto							true	"body"
-//	@Success	200	{object}	resp.Result{data=LoginSuccessResponse}	"resp"
+//	@Param		req	body		loginBodyDto							true	"body"
+//	@Success	200	{object}	resp.Result{data=loginSuccessResponse}	"resp"
 //	@Router		/api/auth/login [post]
 func (c *AuthController) Login(ctx *gin.Context) {
-	var body = new(LoginBodyDto)
+	var body = new(loginBodyDto)
 	if err := ctx.ShouldBindBodyWith(body, binding.JSON); err != nil {
 		ctx.JSON(resp.ParamErr(valid.ErrTransform(err)))
 		return
 	}
-	token, err := authService.UsernameAndPasswordLogin(body.Username, body.Password)
+	token, err := c.service.UsernameAndPasswordLogin(body.Username, body.Password)
 	if err != nil {
 		ctx.JSON(resp.ParseErr(err))
 	} else {
-		ctx.JSON(resp.Success(LoginSuccessResponse{Token: token}, "登录成功"))
+		ctx.JSON(resp.Success(loginSuccessResponse{Token: token}, "登录成功"))
 	}
 }
 
@@ -59,11 +57,11 @@ func (c *AuthController) Login(ctx *gin.Context) {
 //	@Tags		用户
 //	@Accept		json
 //	@Produce	json
-//	@Param		req	body		RegisterBodyDto							true	"body"
-//	@Success	200	{object}	resp.Result{data=LoginSuccessResponse}	"resp"
+//	@Param		req	body		registerBodyDto							true	"body"
+//	@Success	200	{object}	resp.Result{data=loginSuccessResponse}	"resp"
 //	@Router		/api/auth/register [post]
 func (c *AuthController) Register(ctx *gin.Context) {
-	var body = new(RegisterBodyDto)
+	var body = new(registerBodyDto)
 	if err := ctx.ShouldBindBodyWith(body, binding.JSON); err != nil {
 		ctx.JSON(resp.ParamErr(valid.ErrTransform(err)))
 		return
@@ -73,22 +71,22 @@ func (c *AuthController) Register(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(resp.ParseErr(err))
 	} else {
-		ctx.JSON(resp.Success(LoginSuccessResponse{Token: token}, "注册成功"))
+		ctx.JSON(resp.Success(loginSuccessResponse{Token: token}, "注册成功"))
 	}
 }
 
-type LoginBodyDto struct {
+type loginBodyDto struct {
 	Username string `json:"username"` // 用户名
 	Password string `json:"password"` // 密码
 }
 
-type RegisterBodyDto struct {
+type registerBodyDto struct {
 	Username string `json:"username" binding:"required" label:"用户名"` // 用户名
 	Password string `json:"password" binding:"required" label:"密码"`  // 密码
 	Email    string `json:"email" binding:"required" label:"邮箱"`     // 邮箱
 	Captcha  string `json:"captcha"`                                 // 邮箱验证码
 }
 
-type LoginSuccessResponse struct {
+type loginSuccessResponse struct {
 	Token string `json:"token"`
 }

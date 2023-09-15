@@ -1,15 +1,16 @@
 package model
 
 import (
-	"gorm.io/gorm"
+	"server/consts"
 )
 
 type User struct {
-	gorm.Model
-	Name    string `json:"name"`
-	Age     uint32 `json:"age"`
-	Email   string `json:"email" gorm:"unique"`
-	Avatar  string `json:"avatar"`
+	BaseModel
+	Name    string            `json:"name"`
+	Age     uint32            `json:"age"`
+	Email   string            `json:"email" gorm:"unique"`
+	Avatar  string            `json:"avatar"`
+	Status  consts.UserStatus `json:"status" gorm:"default=1"`
 	Account []Account
 }
 

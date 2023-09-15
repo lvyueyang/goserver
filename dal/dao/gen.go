@@ -16,44 +16,54 @@ import (
 )
 
 var (
-	Q       = new(Query)
-	Account *account
-	Captcha *captcha
-	User    *user
+	Q         = new(Query)
+	Account   *account
+	AdminRole *adminRole
+	AdminUser *adminUser
+	Captcha   *captcha
+	User      *user
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Account = &Q.Account
+	AdminRole = &Q.AdminRole
+	AdminUser = &Q.AdminUser
 	Captcha = &Q.Captcha
 	User = &Q.User
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:      db,
-		Account: newAccount(db, opts...),
-		Captcha: newCaptcha(db, opts...),
-		User:    newUser(db, opts...),
+		db:        db,
+		Account:   newAccount(db, opts...),
+		AdminRole: newAdminRole(db, opts...),
+		AdminUser: newAdminUser(db, opts...),
+		Captcha:   newCaptcha(db, opts...),
+		User:      newUser(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Account account
-	Captcha captcha
-	User    user
+	Account   account
+	AdminRole adminRole
+	AdminUser adminUser
+	Captcha   captcha
+	User      user
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:      db,
-		Account: q.Account.clone(db),
-		Captcha: q.Captcha.clone(db),
-		User:    q.User.clone(db),
+		db:        db,
+		Account:   q.Account.clone(db),
+		AdminRole: q.AdminRole.clone(db),
+		AdminUser: q.AdminUser.clone(db),
+		Captcha:   q.Captcha.clone(db),
+		User:      q.User.clone(db),
 	}
 }
 
@@ -67,24 +77,30 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:      db,
-		Account: q.Account.replaceDB(db),
-		Captcha: q.Captcha.replaceDB(db),
-		User:    q.User.replaceDB(db),
+		db:        db,
+		Account:   q.Account.replaceDB(db),
+		AdminRole: q.AdminRole.replaceDB(db),
+		AdminUser: q.AdminUser.replaceDB(db),
+		Captcha:   q.Captcha.replaceDB(db),
+		User:      q.User.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Account IAccountDo
-	Captcha ICaptchaDo
-	User    IUserDo
+	Account   IAccountDo
+	AdminRole IAdminRoleDo
+	AdminUser IAdminUserDo
+	Captcha   ICaptchaDo
+	User      IUserDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Account: q.Account.WithContext(ctx),
-		Captcha: q.Captcha.WithContext(ctx),
-		User:    q.User.WithContext(ctx),
+		Account:   q.Account.WithContext(ctx),
+		AdminRole: q.AdminRole.WithContext(ctx),
+		AdminUser: q.AdminUser.WithContext(ctx),
+		Captcha:   q.Captcha.WithContext(ctx),
+		User:      q.User.WithContext(ctx),
 	}
 }
 

@@ -1,4 +1,24 @@
 definitions:
+  api.CreateAdminUserBodyDto:
+    properties:
+      email:
+        description: 邮箱
+        type: string
+      name:
+        description: 姓名
+        type: string
+      password:
+        description: 密码
+        type: string
+      username:
+        description: 用户名
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - username
+    type: object
   api.CreateCaptchaReqDto:
     properties:
       captcha_key:
@@ -25,7 +45,59 @@ definitions:
     - type
     - value
     type: object
-  api.LoginBodyDto:
+  api.ResetPasswordAdminUserBodyDto:
+    properties:
+      password:
+        description: 密码
+        type: string
+    required:
+    - password
+    type: object
+  api.UpdateAdminUserBodyDto:
+    properties:
+      name:
+        description: 姓名
+        type: string
+    required:
+    - name
+    type: object
+  api.adminInitRootUserBodyDto:
+    properties:
+      email:
+        description: 邮箱
+        type: string
+      name:
+        description: 昵称
+        type: string
+      password:
+        description: 密码
+        type: string
+      username:
+        description: 用户名
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - username
+    type: object
+  api.adminUserForgetPasswordBodyDto:
+    properties:
+      captcha:
+        description: 邮箱验证码
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      password:
+        description: 密码
+        type: string
+    required:
+    - captcha
+    - email
+    - password
+    type: object
+  api.adminUserLoginBodyDto:
     properties:
       password:
         description: 密码
@@ -34,12 +106,26 @@ definitions:
         description: 用户名
         type: string
     type: object
-  api.LoginSuccessResponse:
+  api.adminUserLoginSuccessResponse:
     properties:
       token:
         type: string
     type: object
-  api.RegisterBodyDto:
+  api.loginBodyDto:
+    properties:
+      password:
+        description: 密码
+        type: string
+      username:
+        description: 用户名
+        type: string
+    type: object
+  api.loginSuccessResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  api.registerBodyDto:
     properties:
       captcha:
         description: 邮箱验证码
@@ -64,6 +150,17 @@ definitions:
         description: 模块名称
         type: string
     type: object
+  consts.AdminUserStatus:
+    enum:
+    - 1
+    - -1
+    type: integer
+    x-enum-comments:
+      AdminUserStatusLocked: 锁定
+      AdminUserStatusNormal: 正常
+    x-enum-varnames:
+    - AdminUserStatusNormal
+    - AdminUserStatusLocked
   consts.CaptchaScenes:
     enum:
     - 1
@@ -83,6 +180,40 @@ definitions:
     x-enum-varnames:
     - CaptchaTypePhone
     - CaptchaTypeEmail
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  model.AdminUser:
+    properties:
+      avatar:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      id:
+        type: integer
+      is_root:
+        description: 是否是超级管理员
+        type: boolean
+      name:
+        type: string
+      password:
+        type: string
+      status:
+        $ref: '#/definitions/consts.AdminUserStatus'
+      updated_at:
+        type: string
+      user_name:
+        type: string
+    type: object
   resp.Result:
     properties:
       code:
@@ -96,7 +227,179 @@ info:
   title: 男生自用 API 接口文档
   version: "1.0"
 paths:
-  /admin/api/user/list:
+  /api/admin/auth/forget-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.adminUserForgetPasswordBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            $ref: '#/definitions/resp.Result'
+      summary: 管理后台-
+      tags:
+      - 管理后台-管理员用户
+  /api/admin/auth/init-root-user:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.adminInitRootUserBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.adminUserLoginSuccessResponse'
+              type: object
+      summary: 初始化超级管理员用户
+      tags:
+      - 管理后台-管理员用户
+  /api/admin/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.adminUserLoginBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.adminUserLoginSuccessResponse'
+              type: object
+      summary: 用户登录
+      tags:
+      - 管理后台-管理员用户
+  /api/admin/user:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            type: string
+      summary: 管理员列表
+      tags:
+      - 管理后台-管理员用户
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 管理员信息
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateAdminUserBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp.Result
+          schema:
+            type: string
+      summary: 管理员新增
+      tags:
+      - 管理后台-管理员用户
+  /api/admin/user/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 管理员信息
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateAdminUserBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 用户详情
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.AdminUser'
+              type: object
+      summary: 管理员详情
+      tags:
+      - 管理后台-管理员用户
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 管理员信息
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateAdminUserBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp.Result
+          schema:
+            type: string
+      summary: 管理员修改
+      tags:
+      - 管理后台-管理员用户
+  /api/admin/user/current:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 用户详情
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.AdminUser'
+              type: object
+      summary: 当前登陆者信息
+      tags:
+      - 管理后台-管理员用户
+  /api/admin/user/list:
     get:
       consumes:
       - application/json
@@ -110,6 +413,27 @@ paths:
       summary: 用户列表
       tags:
       - 管理后台-用户
+  /api/admin/user/reset-password/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 管理员信息
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.ResetPasswordAdminUserBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp.Result
+          schema:
+            type: string
+      summary: 重置管理员密码
+      tags:
+      - 管理后台-管理员用户
   /api/auth/login:
     post:
       consumes:
@@ -120,7 +444,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/api.LoginBodyDto'
+          $ref: '#/definitions/api.loginBodyDto'
       produces:
       - application/json
       responses:
@@ -131,7 +455,7 @@ paths:
             - $ref: '#/definitions/resp.Result'
             - properties:
                 data:
-                  $ref: '#/definitions/api.LoginSuccessResponse'
+                  $ref: '#/definitions/api.loginSuccessResponse'
               type: object
       summary: 用户登录
       tags:
@@ -146,7 +470,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/api.RegisterBodyDto'
+          $ref: '#/definitions/api.registerBodyDto'
       produces:
       - application/json
       responses:
@@ -157,7 +481,7 @@ paths:
             - $ref: '#/definitions/resp.Result'
             - properties:
                 data:
-                  $ref: '#/definitions/api.LoginSuccessResponse'
+                  $ref: '#/definitions/api.loginSuccessResponse'
               type: object
       summary: 用户注册
       tags:

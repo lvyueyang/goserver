@@ -1,17 +1,18 @@
 package model
 
 import (
-	"gorm.io/gorm"
+	"server/consts"
 )
 
 type AdminUser struct {
-	gorm.Model
-	Name     string `json:"name"`
-	UserName string `json:"user_name" gorm:"unique"`
-	Password string `json:"password"`
-	Email    string `json:"email" gorm:"unique"`
-	Avatar   string `json:"avatar"`
-	IsRoot   bool   `json:"is_root"` // 是否是超级管理员
+	BaseModel
+	Name     string                 `json:"name"`
+	Username string                 `json:"user_name" gorm:"unique"`
+	Password string                 `json:"_"`
+	Email    string                 `json:"email" gorm:"unique"`
+	Avatar   string                 `json:"avatar"`
+	IsRoot   bool                   `json:"is_root"` // 是否是超级管理员
+	Status   consts.AdminUserStatus `json:"status"`
 }
 
 func (AdminUser) TableName() string {

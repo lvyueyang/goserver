@@ -3,7 +3,6 @@ package main
 import (
 	"gorm.io/gen"
 	"server/config"
-	"server/dal/model"
 	"server/db"
 )
 
@@ -19,7 +18,7 @@ func main() {
 
 	g.UseDB(database)
 
-	g.ApplyBasic(model.User{}, model.Captcha{}, model.Account{})
+	g.ApplyBasic(db.Models...)
 
 	g.Execute()
 }
