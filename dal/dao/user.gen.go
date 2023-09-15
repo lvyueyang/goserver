@@ -6,6 +6,7 @@ package dao
 
 import (
 	"context"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -17,6 +18,8 @@ import (
 	"gorm.io/plugin/dbresolver"
 
 	"server/dal/model"
+
+	"server/types"
 )
 
 func newUser(db *gorm.DB, opts ...gen.DOOption) user {
@@ -257,6 +260,23 @@ type IUserDo interface {
 	Returning(value interface{}, columns ...string) IUserDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	FindList(page types.PaginationQuery, order types.OrderQuery) (result []model.User, err error)
+}
+
+// FindList
+// SELECT * FROM @@table
+// ORDER BY order.OrderKey order.OrderType
+// LIMIT page.PageSize OFFSET (page.Current - 1) * page.PageSize
+func (u userDo) FindList(page types.PaginationQuery, order types.OrderQuery) (result []model.User, err error) {
+	var generateSQL strings.Builder
+	generateSQL.WriteString("SELECT * FROM user ORDER BY order.OrderKey order.OrderType LIMIT page.PageSize OFFSET (page.Current - 1) * page.PageSize ")
+
+	var executeSQL *gorm.DB
+	executeSQL = u.UnderlyingDB().Raw(generateSQL.String()).Find(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (u userDo) Debug() IUserDo {

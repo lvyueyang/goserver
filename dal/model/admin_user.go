@@ -8,7 +8,7 @@ type AdminUser struct {
 	BaseModel
 	Name     string                 `json:"name"`
 	Username string                 `json:"user_name" gorm:"unique"`
-	Password string                 `json:"_"`
+	Password string                 `json:"-"`
 	Email    string                 `json:"email" gorm:"unique"`
 	Avatar   string                 `json:"avatar"`
 	IsRoot   bool                   `json:"is_root"` // 是否是超级管理员

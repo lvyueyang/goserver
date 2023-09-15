@@ -35,7 +35,6 @@ func isAdminLogin(c *gin.Context) error {
 			return errors.New("用户不存在")
 		}
 		//fmt.Printf("USER %+v \n", user)
-		user.Password = ""
 		c.Set(consts.ContextUserInfoKey, user)
 	}
 	return nil

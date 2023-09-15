@@ -8,7 +8,7 @@ type Account struct {
 	BaseModel
 	Type      consts.AccountType `json:"type"`
 	Username  string             `json:"username" gorm:"unique"`
-	Password  string             `json:"_"`
+	Password  string             `json:"-"`
 	Email     string             `json:"email" gorm:"unique"`
 	WxOpenId  string             `json:"wx_open_id"`
 	WxUnionId string             `json:"wx_union_id"`

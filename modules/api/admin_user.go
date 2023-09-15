@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"net/http"
 	"server/consts"
 	"server/dal/model"
 	"server/lib/valid"
@@ -38,7 +39,7 @@ func NewAdminUserController(e *gin.Engine) {
 //	@Router		/api/admin/user [get]
 func (c *AdminUserController) FindList(ctx *gin.Context) {
 	list, _ := c.service.FindList(service.FindUserListOption{})
-	ctx.JSON(resp.Succ(list))
+	ctx.JSON(http.StatusOK, list)
 }
 
 // Create

@@ -20,13 +20,14 @@ func NewAdminUserService() *AdminUserService {
 }
 
 type FindUserListOption struct {
-	types.PaginationQuery
-	types.OrderQuery
+	types.Pagination
+	types.Order
 	Keyword string `json:"keyword"`
 }
 
-func (s *AdminUserService) FindList(query FindUserListOption) ([]*model.AdminUser, error) {
-	return dao.AdminUser.Where(dao.AdminUser.Username.Like(query.Keyword)).Find()
+func (s *AdminUserService) FindList(query FindUserListOption) ([]model.AdminUser, error) {
+	var find = dao.AdminUser.Where(dao.AdminUser.Username.Like("%" + query.Keyword + "%"))
+	return find.FindList(query.Order, utils.PaginationDefault(query.Pagination))
 }
 
 type CreateAdminUser struct {
