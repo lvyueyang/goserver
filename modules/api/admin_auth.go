@@ -73,7 +73,7 @@ func (c *AdminAuthController) InitRootUser(ctx *gin.Context) {
 
 // ForgetPassword
 //
-//	@Summary	管理后台-
+//	@Summary	忘记密码
 //	@Tags		管理后台-管理员用户
 //	@Accept		json
 //	@Produce	json

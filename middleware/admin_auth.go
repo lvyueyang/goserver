@@ -30,7 +30,7 @@ func isAdminLogin(c *gin.Context) error {
 		return errors.New("身份过期")
 	} else {
 		userId := info.User.Id
-		user, err := dao.AdminUser.Where(dao.AdminUser.ID.Eq(userId)).Take()
+		user, err := dao.AdminUser.Where(dao.AdminUser.ID.Eq(userId)).Preload(dao.AdminUser.Roles).Take()
 		if err != nil {
 			return errors.New("用户不存在")
 		}

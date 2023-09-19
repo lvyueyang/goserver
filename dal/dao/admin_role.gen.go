@@ -33,8 +33,27 @@ func newAdminRole(db *gorm.DB, opts ...gen.DOOption) adminRole {
 	_adminRole.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_adminRole.DeletedAt = field.NewField(tableName, "deleted_at")
 	_adminRole.Name = field.NewString(tableName, "name")
+	_adminRole.Code = field.NewString(tableName, "code")
 	_adminRole.Desc = field.NewString(tableName, "desc")
-	_adminRole.PermissionCode = field.NewField(tableName, "permission_code")
+	_adminRole.PermissionCodes = field.NewField(tableName, "permission_codes")
+	_adminRole.Users = adminRoleManyToManyUsers{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Users", "model.AdminUser"),
+		Roles: struct {
+			field.RelationField
+			Users struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("Users.Roles", "model.AdminRole"),
+			Users: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Users.Roles.Users", "model.AdminUser"),
+			},
+		},
+	}
 
 	_adminRole.fillFieldMap()
 
@@ -44,14 +63,16 @@ func newAdminRole(db *gorm.DB, opts ...gen.DOOption) adminRole {
 type adminRole struct {
 	adminRoleDo
 
-	ALL            field.Asterisk
-	ID             field.Uint
-	CreatedAt      field.Time
-	UpdatedAt      field.Time
-	DeletedAt      field.Field
-	Name           field.String
-	Desc           field.String
-	PermissionCode field.Field
+	ALL             field.Asterisk
+	ID              field.Uint
+	CreatedAt       field.Time
+	UpdatedAt       field.Time
+	DeletedAt       field.Field
+	Name            field.String
+	Code            field.String
+	Desc            field.String
+	PermissionCodes field.Field
+	Users           adminRoleManyToManyUsers
 
 	fieldMap map[string]field.Expr
 }
@@ -73,8 +94,9 @@ func (a *adminRole) updateTableName(table string) *adminRole {
 	a.UpdatedAt = field.NewTime(table, "updated_at")
 	a.DeletedAt = field.NewField(table, "deleted_at")
 	a.Name = field.NewString(table, "name")
+	a.Code = field.NewString(table, "code")
 	a.Desc = field.NewString(table, "desc")
-	a.PermissionCode = field.NewField(table, "permission_code")
+	a.PermissionCodes = field.NewField(table, "permission_codes")
 
 	a.fillFieldMap()
 
@@ -91,14 +113,16 @@ func (a *adminRole) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *adminRole) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 7)
+	a.fieldMap = make(map[string]field.Expr, 9)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
 	a.fieldMap["deleted_at"] = a.DeletedAt
 	a.fieldMap["name"] = a.Name
+	a.fieldMap["code"] = a.Code
 	a.fieldMap["desc"] = a.Desc
-	a.fieldMap["permission_code"] = a.PermissionCode
+	a.fieldMap["permission_codes"] = a.PermissionCodes
+
 }
 
 func (a adminRole) clone(db *gorm.DB) adminRole {
@@ -109,6 +133,84 @@ func (a adminRole) clone(db *gorm.DB) adminRole {
 func (a adminRole) replaceDB(db *gorm.DB) adminRole {
 	a.adminRoleDo.ReplaceDB(db)
 	return a
+}
+
+type adminRoleManyToManyUsers struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	Roles struct {
+		field.RelationField
+		Users struct {
+			field.RelationField
+		}
+	}
+}
+
+func (a adminRoleManyToManyUsers) Where(conds ...field.Expr) *adminRoleManyToManyUsers {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a adminRoleManyToManyUsers) WithContext(ctx context.Context) *adminRoleManyToManyUsers {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a adminRoleManyToManyUsers) Session(session *gorm.Session) *adminRoleManyToManyUsers {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a adminRoleManyToManyUsers) Model(m *model.AdminRole) *adminRoleManyToManyUsersTx {
+	return &adminRoleManyToManyUsersTx{a.db.Model(m).Association(a.Name())}
+}
+
+type adminRoleManyToManyUsersTx struct{ tx *gorm.Association }
+
+func (a adminRoleManyToManyUsersTx) Find() (result []*model.AdminUser, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a adminRoleManyToManyUsersTx) Append(values ...*model.AdminUser) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a adminRoleManyToManyUsersTx) Replace(values ...*model.AdminUser) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a adminRoleManyToManyUsersTx) Delete(values ...*model.AdminUser) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a adminRoleManyToManyUsersTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a adminRoleManyToManyUsersTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type adminRoleDo struct{ gen.DO }

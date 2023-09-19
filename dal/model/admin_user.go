@@ -13,6 +13,7 @@ type AdminUser struct {
 	Avatar   string                 `json:"avatar"`
 	IsRoot   bool                   `json:"is_root"` // 是否是超级管理员
 	Status   consts.AdminUserStatus `json:"status"`
+	Roles    []*AdminRole           `json:"roles" gorm:"many2many:admin_user_roles;"`
 }
 
 func (AdminUser) TableName() string {

@@ -24,10 +24,10 @@ func NewAdminUserController(e *gin.Engine) {
 	admin.GET("", c.FindList)
 	admin.GET("/current", middleware.AdminAuth(), c.CurrentInfo)
 	admin.POST("", c.Create)
-	admin.POST("/:id", c.Detail)
 	admin.PUT("/:id", c.Update)
 	admin.PUT("/reset-password/:id", c.ResetPassword)
 	admin.PUT("/status/:id", c.UpdateStatus)
+	admin.PUT("/role", c.UpdateRole)
 }
 
 // FindList
@@ -44,7 +44,7 @@ func NewAdminUserController(e *gin.Engine) {
 //	@Success	200			{object}	resp.Result{data=resp.RList{list=[]model.AdminUser}}	"resp"
 //	@Router		/api/admin/user [get]
 func (c *AdminUserController) FindList(ctx *gin.Context) {
-	query := service.FindUserListOption{}
+	query := service.FindAdminUserListOption{}
 	if err := ctx.ShouldBindQuery(&query); err != nil {
 		ctx.JSON(resp.ParamErr(valid.ErrTransform(err)))
 		return
@@ -78,19 +78,6 @@ func (c *AdminUserController) Create(ctx *gin.Context) {
 		ctx.JSON(resp.ParseErr(err))
 		return
 	}
-	ctx.JSON(resp.Succ(nil))
-}
-
-// Detail
-//
-//	@Summary	管理员详情
-//	@Tags		管理后台-管理员用户
-//	@Accept		json
-//	@Produce	json
-//	@Param		req	body		CreateAdminUserBodyDto				true	"管理员信息"
-//	@Success	200	{object}	resp.Result{data=model.AdminUser}	"用户详情"
-//	@Router		/api/admin/user/{id} [get]
-func (c *AdminUserController) Detail(ctx *gin.Context) {
 	ctx.JSON(resp.Succ(nil))
 }
 
@@ -179,6 +166,31 @@ func (c *AdminUserController) CurrentInfo(ctx *gin.Context) {
 	ctx.JSON(resp.Succ(user))
 }
 
+// UpdateRole
+//
+//	@Summary	为管理用户更新角色
+//	@Tags		管理后台-管理员用户
+//	@Accept		json
+//	@Produce	json
+//	@Param		req	body		AdminUserUpdateRolesBodyDto	true	"req"
+//	@Success	200	{object}	resp.Result					"resp"
+//	@Router		/api/admin/user/role [put]
+func (c *AdminUserController) UpdateRole(ctx *gin.Context) {
+	var body AdminUserUpdateRolesBodyDto
+
+	if err := ctx.ShouldBindBodyWith(&body, binding.JSON); err != nil {
+		ctx.JSON(resp.ParamErr(valid.ErrTransform(err)))
+		return
+	}
+
+	if err := c.service.UpdateRole(body.UserId, body.RoleIds); err != nil {
+		ctx.JSON(resp.ParseErr(err))
+		return
+	}
+
+	ctx.JSON(resp.Succ(nil))
+}
+
 type CreateAdminUserBodyDto struct {
 	Name     string `json:"name" binding:"required" label:"姓名"`      // 姓名
 	Username string `json:"username" binding:"required" label:"用户名"` // 用户名
@@ -195,6 +207,12 @@ type UpdateAdminUserBodyDto struct {
 type UpdateAdminUserStatusBodyDto struct {
 	Status consts.AdminUserStatus `json:"status" binding:"required" label:"用户状态" enums:"-1,1"` // 状态 1-解封 2-封禁
 }
+
 type ResetPasswordAdminUserBodyDto struct {
 	Password string `json:"password" binding:"required" label:"密码"` // 密码
+}
+
+type AdminUserUpdateRolesBodyDto struct {
+	UserId  uint   `json:"user_id" binding:"required" label:"用户 ID"`  // 用户 ID
+	RoleIds []uint `json:"role_ids" binding:"required" label:"角色 ID"` // 角色 ID
 }

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"server/config"
 	"server/consts"
@@ -20,23 +19,23 @@ func NewAdminUserService() *AdminUserService {
 	return new(AdminUserService)
 }
 
-type FindUserListOption struct {
+type FindAdminUserListOption struct {
 	types.Pagination
 	types.Order
 	Keyword string `json:"keyword" form:"keyword"`
 }
 
-func (s *AdminUserService) FindList(query FindUserListOption) (utils.ListResult[[]*model.AdminUser], error) {
-	fmt.Printf("query:%+v\n", query)
+func (s *AdminUserService) FindList(query FindAdminUserListOption) (utils.ListResult[[]*model.AdminUser], error) {
 	result := utils.ListResult[[]*model.AdminUser]{}
-	q := dao.AdminUser.Where(
-		dao.AdminUser.Username.Like("%" + query.Keyword + "%"),
+	u := dao.AdminUser
+	q := u.Where(
+		u.Username.Like("%" + query.Keyword + "%"),
 	).Or(
-		dao.AdminUser.Name.Like("%" + query.Keyword + "%"),
+		u.Name.Like("%" + query.Keyword + "%"),
 	)
 
 	if query.OrderKey != "" {
-		col, _ := dao.AdminUser.GetFieldByName(query.OrderKey)
+		col, _ := u.GetFieldByName(query.OrderKey)
 		if strings.ToLower(query.OrderType) == "desc" {
 			q = q.Order(col.Desc())
 		} else {
@@ -44,7 +43,7 @@ func (s *AdminUserService) FindList(query FindUserListOption) (utils.ListResult[
 		}
 	}
 
-	if list, total, err := q.FindByPage(utils.PageTrans(query.Pagination)); err != nil {
+	if list, total, err := q.Preload(u.Roles).FindByPage(utils.PageTrans(query.Pagination)); err != nil {
 		return result, err
 	} else {
 		result.List = list
@@ -160,7 +159,6 @@ func (s *AdminUserService) CreateRootUser(username, name, password, email string
 	if token, err := utils.CreateAdminUserToken(user.ID, config.Config.Auth.AdminTokenSecret); err != nil {
 		return "", nil
 	} else {
-		fmt.Println("token", token)
 		return token, nil
 	}
 }
@@ -172,6 +170,49 @@ func (s *AdminUserService) ResetPassword(email, password string) error {
 	}
 
 	return updateAdminUserPassword(user.ID, password)
+}
+
+func (s *AdminUserService) AddRole(userID uint, roleIDs []uint) error {
+	user, err := dao.AdminUser.FindByID(userID)
+	if err != nil {
+		return errs.CreateServerError("用户不存在", err, nil)
+	}
+	roles, err := dao.AdminRole.Where(dao.AdminRole.ID.In(roleIDs...)).Find()
+	if err != nil {
+		return errs.CreateServerError("角色不存在", err, nil)
+	}
+
+	return dao.AdminUser.Roles.Model(user).Append(roles...)
+}
+
+func (s *AdminUserService) DeleteRole(userID uint, roleIDs []uint) error {
+	user, err := dao.AdminUser.FindByID(userID)
+	if err != nil {
+		return errs.CreateServerError("用户不存在", err, nil)
+	}
+	roles, err := dao.AdminRole.Where(dao.AdminRole.ID.In(roleIDs...)).Find()
+	if err != nil {
+		return errs.CreateServerError("角色不存在", err, nil)
+	}
+
+	return dao.AdminUser.Roles.Model(user).Delete(roles...)
+}
+
+func (s *AdminUserService) UpdateRole(userID uint, roleIDs []uint) error {
+	user, err := dao.AdminUser.FindByID(userID)
+	if err != nil {
+		return errs.CreateServerError("用户不存在", err, nil)
+	}
+	roles, err := dao.AdminRole.Where(dao.AdminRole.ID.In(roleIDs...)).Find()
+	if err != nil {
+		return errs.CreateServerError("角色不存在", err, nil)
+	}
+
+	if err := dao.AdminUser.Roles.Model(user).Clear(); err != nil {
+		return errs.CreateServerError("清除用户角色失败", err, nil)
+	}
+
+	return dao.AdminUser.Roles.Model(user).Append(roles...)
 }
 
 func updateAdminUserPassword(id uint, password string) error {
