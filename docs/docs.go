@@ -151,11 +151,76 @@ const docTemplate = `{
                     "管理后台-管理员用户"
                 ],
                 "summary": "管理员列表",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "default": 1,
+                        "description": "当前页",
+                        "name": "current",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "default": 20,
+                        "description": "每页条数",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "需要排序的列",
+                        "name": "order_key",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "ase",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "排序方式",
+                        "name": "order_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "按用户名搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "resp",
                         "schema": {
-                            "type": "string"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resp.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/resp.RList"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "list": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/model.AdminUser"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -170,7 +235,7 @@ const docTemplate = `{
                 "tags": [
                     "管理后台-管理员用户"
                 ],
-                "summary": "管理员新增",
+                "summary": "新增管理员",
                 "parameters": [
                     {
                         "description": "管理员信息",
@@ -184,9 +249,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "resp.Result",
+                        "description": "resp",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/resp.Result"
                         }
                     }
                 }
@@ -273,9 +338,42 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "resp.Result",
+                        "description": "resp",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/resp.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/user/status/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理后台-管理员用户"
+                ],
+                "summary": "修改管理员状态(封禁/解封)",
+                "parameters": [
+                    {
+                        "description": "用户状态",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateAdminUserStatusBodyDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "resp",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Result"
                         }
                     }
                 }
@@ -335,7 +433,7 @@ const docTemplate = `{
                 "tags": [
                     "管理后台-管理员用户"
                 ],
-                "summary": "管理员修改",
+                "summary": "修改管理员信息",
                 "parameters": [
                     {
                         "description": "管理员信息",
@@ -349,9 +447,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "resp.Result",
+                        "description": "resp",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/resp.Result"
                         }
                     }
                 }
@@ -608,6 +706,10 @@ const docTemplate = `{
                 "username"
             ],
             "properties": {
+                "avatar": {
+                    "description": "头像",
+                    "type": "string"
+                },
                 "email": {
                     "description": "邮箱",
                     "type": "string"
@@ -684,9 +786,33 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
+                "avatar": {
+                    "description": "头像",
+                    "type": "string"
+                },
                 "name": {
                     "description": "姓名",
                     "type": "string"
+                }
+            }
+        },
+        "api.UpdateAdminUserStatusBodyDto": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "description": "状态 1-解封 2-封禁",
+                    "enum": [
+                        -1,
+                        1
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/consts.AdminUserStatus"
+                        }
+                    ]
                 }
             }
         },
@@ -858,18 +984,6 @@ const docTemplate = `{
                 "CaptchaTypeEmail"
             ]
         },
-        "gorm.DeletedAt": {
-            "type": "object",
-            "properties": {
-                "time": {
-                    "type": "string"
-                },
-                "valid": {
-                    "description": "Valid is true if Time is not NULL",
-                    "type": "boolean"
-                }
-            }
-        },
         "model.AdminUser": {
             "type": "object",
             "properties": {
@@ -878,9 +992,6 @@ const docTemplate = `{
                 },
                 "created_at": {
                     "type": "string"
-                },
-                "deleted_at": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "email": {
                     "type": "string"
@@ -895,17 +1006,26 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "password": {
-                    "type": "string"
-                },
                 "status": {
                     "$ref": "#/definitions/consts.AdminUserStatus"
                 },
                 "updated_at": {
                     "type": "string"
                 },
-                "user_name": {
+                "username": {
                     "type": "string"
+                }
+            }
+        },
+        "resp.RList": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {}
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },

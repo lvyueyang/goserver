@@ -30,7 +30,7 @@ func isLogin(c *gin.Context) error {
 		return errors.New("身份过期")
 	} else {
 		userId := info.User.Id
-		user, err := dao.User.Where(dao.User.ID.Eq(userId)).First()
+		user, err := dao.User.Where(dao.User.ID.Eq(userId)).Take()
 		if err != nil {
 			return errors.New("用户不存在")
 		}

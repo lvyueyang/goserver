@@ -7,7 +7,7 @@ import (
 type AdminUser struct {
 	BaseModel
 	Name     string                 `json:"name"`
-	Username string                 `json:"user_name" gorm:"unique"`
+	Username string                 `json:"username" gorm:"unique"`
 	Password string                 `json:"-"`
 	Email    string                 `json:"email" gorm:"unique"`
 	Avatar   string                 `json:"avatar"`

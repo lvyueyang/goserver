@@ -1,6 +1,9 @@
 definitions:
   api.CreateAdminUserBodyDto:
     properties:
+      avatar:
+        description: 头像
+        type: string
       email:
         description: 邮箱
         type: string
@@ -55,11 +58,26 @@ definitions:
     type: object
   api.UpdateAdminUserBodyDto:
     properties:
+      avatar:
+        description: 头像
+        type: string
       name:
         description: 姓名
         type: string
     required:
     - name
+    type: object
+  api.UpdateAdminUserStatusBodyDto:
+    properties:
+      status:
+        allOf:
+        - $ref: '#/definitions/consts.AdminUserStatus'
+        description: 状态 1-解封 2-封禁
+        enum:
+        - -1
+        - 1
+    required:
+    - status
     type: object
   api.adminInitRootUserBodyDto:
     properties:
@@ -180,22 +198,12 @@ definitions:
     x-enum-varnames:
     - CaptchaTypePhone
     - CaptchaTypeEmail
-  gorm.DeletedAt:
-    properties:
-      time:
-        type: string
-      valid:
-        description: Valid is true if Time is not NULL
-        type: boolean
-    type: object
   model.AdminUser:
     properties:
       avatar:
         type: string
       created_at:
         type: string
-      deleted_at:
-        $ref: '#/definitions/gorm.DeletedAt'
       email:
         type: string
       id:
@@ -205,14 +213,20 @@ definitions:
         type: boolean
       name:
         type: string
-      password:
-        type: string
       status:
         $ref: '#/definitions/consts.AdminUserStatus'
       updated_at:
         type: string
-      user_name:
+      username:
         type: string
+    type: object
+  resp.RList:
+    properties:
+      list:
+        items: {}
+        type: array
+      total:
+        type: integer
     type: object
   resp.Result:
     properties:
@@ -304,13 +318,51 @@ paths:
     get:
       consumes:
       - application/json
+      parameters:
+      - default: 1
+        description: 当前页
+        in: query
+        name: current
+        type: number
+      - default: 20
+        description: 每页条数
+        in: query
+        name: page_size
+        type: number
+      - description: 需要排序的列
+        in: query
+        name: order_key
+        type: string
+      - description: 排序方式
+        enum:
+        - ase
+        - desc
+        in: query
+        name: order_type
+        type: string
+      - description: 按用户名搜索
+        in: query
+        name: keyword
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: resp
           schema:
-            type: string
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/resp.RList'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.AdminUser'
+                        type: array
+                    type: object
+              type: object
       summary: 管理员列表
       tags:
       - 管理后台-管理员用户
@@ -328,10 +380,10 @@ paths:
       - application/json
       responses:
         "200":
-          description: resp.Result
+          description: resp
           schema:
-            type: string
-      summary: 管理员新增
+            $ref: '#/definitions/resp.Result'
+      summary: 新增管理员
       tags:
       - 管理后台-管理员用户
   /api/admin/user/{id}:
@@ -374,10 +426,10 @@ paths:
       - application/json
       responses:
         "200":
-          description: resp.Result
+          description: resp
           schema:
-            type: string
-      summary: 管理员修改
+            $ref: '#/definitions/resp.Result'
+      summary: 修改管理员信息
       tags:
       - 管理后台-管理员用户
   /api/admin/user/current:
@@ -428,10 +480,31 @@ paths:
       - application/json
       responses:
         "200":
-          description: resp.Result
+          description: resp
           schema:
-            type: string
+            $ref: '#/definitions/resp.Result'
       summary: 重置管理员密码
+      tags:
+      - 管理后台-管理员用户
+  /api/admin/user/status/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户状态
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateAdminUserStatusBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            $ref: '#/definitions/resp.Result'
+      summary: 修改管理员状态(封禁/解封)
       tags:
       - 管理后台-管理员用户
   /api/auth/login:

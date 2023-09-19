@@ -1,8 +1,6 @@
 package consts
 
-type OrderType string
-
 const (
-	OrderTypeDesc OrderType = "desc" // 降序
-	OrderTypeAsc  OrderType = "asc"  // 升序
+	OrderTypeDesc string = "desc" // 降序
+	OrderTypeAsc  string = "asc"  // 升序
 )

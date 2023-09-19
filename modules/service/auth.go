@@ -44,10 +44,10 @@ func (s *AuthService) UsernameAndPasswordRegister(email, username, password stri
 	fmt.Println("accountService", s.accountService)
 
 	// 验证用户名和邮箱是否已被使用
-	if _, err := dao.Account.Where(dao.Account.Email.Eq(email)).First(); err == nil {
+	if _, err := dao.Account.Where(dao.Account.Email.Eq(email)).Take(); err == nil {
 		return "", &errs.ClientError{Msg: "邮箱已存在", Info: nil}
 	}
-	if _, err := dao.Account.Where(dao.Account.Username.Eq(username)).First(); err == nil {
+	if _, err := dao.Account.Where(dao.Account.Username.Eq(username)).Take(); err == nil {
 		return "", &errs.ClientError{Msg: "用户名已存在", Info: nil}
 	}
 

@@ -24,7 +24,7 @@ type CreateUser struct {
 }
 
 func (s *UserService) FindByID(id uint) (*model.User, error) {
-	return dao.User.Where(dao.User.ID.Eq(id)).First()
+	return dao.User.FindByID(id)
 }
 
 func (s *UserService) Create(u CreateUser) *model.User {

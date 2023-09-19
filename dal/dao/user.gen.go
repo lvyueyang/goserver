@@ -261,19 +261,64 @@ type IUserDo interface {
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
 
-	FindList(page types.PaginationQuery, order types.OrderQuery) (result []model.User, err error)
+	FindList(order types.Order, offset int, limit int) (result []*model.User, err error)
+	FindByID(id uint) (result *model.User, err error)
 }
 
-// FindList
-// SELECT * FROM @@table
-// ORDER BY order.OrderKey order.OrderType
-// LIMIT page.PageSize OFFSET (page.Current - 1) * page.PageSize
-func (u userDo) FindList(page types.PaginationQuery, order types.OrderQuery) (result []model.User, err error) {
+// FindList // 查询列表
+//
+// SELECT *
+// FROM @@table
+// {{ if order.OrderKey != "" }}
+// {{ if order.OrderType == "desc"}}
+//
+//	ORDER BY @@order.OrderKey DESC
+//
+// {{ else }}
+//
+//	ORDER BY @@order.OrderKey
+//
+// {{ end }}
+// {{ end }}
+// LIMIT @limit
+// OFFSET @offset
+func (u userDo) FindList(order types.Order, offset int, limit int) (result []*model.User, err error) {
+	var params []interface{}
+
 	var generateSQL strings.Builder
-	generateSQL.WriteString("SELECT * FROM user ORDER BY order.OrderKey order.OrderType LIMIT page.PageSize OFFSET (page.Current - 1) * page.PageSize ")
+	generateSQL.WriteString("SELECT * FROM user ")
+	if order.OrderKey != "" {
+		if order.OrderType == "desc" {
+			generateSQL.WriteString("ORDER BY " + u.Quote(order.OrderKey) + " DESC ")
+		} else {
+			generateSQL.WriteString("ORDER BY " + u.Quote(order.OrderKey) + " ")
+		}
+	}
+	params = append(params, limit)
+	params = append(params, offset)
+	generateSQL.WriteString("LIMIT ? OFFSET ? ")
 
 	var executeSQL *gorm.DB
-	executeSQL = u.UnderlyingDB().Raw(generateSQL.String()).Find(&result) // ignore_security_alert
+	executeSQL = u.UnderlyingDB().Raw(generateSQL.String(), params...).Find(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
+
+// FindByID // 根据 ID 查询
+//
+// SELECT *
+// FROM @@table
+// WHERE id=@id
+func (u userDo) FindByID(id uint) (result *model.User, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("SELECT * FROM user WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = u.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
 	err = executeSQL.Error
 
 	return

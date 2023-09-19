@@ -6,6 +6,7 @@ package dao
 
 import (
 	"context"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -17,6 +18,8 @@ import (
 	"gorm.io/plugin/dbresolver"
 
 	"server/dal/model"
+
+	"server/types"
 )
 
 func newAccount(db *gorm.DB, opts ...gen.DOOption) account {
@@ -187,6 +190,68 @@ type IAccountDo interface {
 	Returning(value interface{}, columns ...string) IAccountDo
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
+
+	FindList(order types.Order, offset int, limit int) (result []*model.Account, err error)
+	FindByID(id uint) (result *model.Account, err error)
+}
+
+// FindList // 查询列表
+//
+// SELECT *
+// FROM @@table
+// {{ if order.OrderKey != "" }}
+// {{ if order.OrderType == "desc"}}
+//
+//	ORDER BY @@order.OrderKey DESC
+//
+// {{ else }}
+//
+//	ORDER BY @@order.OrderKey
+//
+// {{ end }}
+// {{ end }}
+// LIMIT @limit
+// OFFSET @offset
+func (a accountDo) FindList(order types.Order, offset int, limit int) (result []*model.Account, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	generateSQL.WriteString("SELECT * FROM account ")
+	if order.OrderKey != "" {
+		if order.OrderType == "desc" {
+			generateSQL.WriteString("ORDER BY " + a.Quote(order.OrderKey) + " DESC ")
+		} else {
+			generateSQL.WriteString("ORDER BY " + a.Quote(order.OrderKey) + " ")
+		}
+	}
+	params = append(params, limit)
+	params = append(params, offset)
+	generateSQL.WriteString("LIMIT ? OFFSET ? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = a.UnderlyingDB().Raw(generateSQL.String(), params...).Find(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
+
+// FindByID // 根据 ID 查询
+//
+// SELECT *
+// FROM @@table
+// WHERE id=@id
+func (a accountDo) FindByID(id uint) (result *model.Account, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("SELECT * FROM account WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = a.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
 }
 
 func (a accountDo) Debug() IAccountDo {

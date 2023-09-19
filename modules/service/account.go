@@ -61,17 +61,17 @@ func (s *AccountService) CreateWxMp(openid string) (model.User, error) {
 
 // UseEmailFindOne 使用邮箱查账号
 func (s *AccountService) UseEmailFindOne(email string) (info *model.Account, err error) {
-	return dao.Account.Where(dao.Account.Email.Eq(email)).First()
+	return dao.Account.Where(dao.Account.Email.Eq(email)).Take()
 }
 
 // UseUsernameFindOne 使用用户名查账号
 func (s *AccountService) UseUsernameFindOne(username string) (info *model.Account, err error) {
-	return dao.Account.Where(dao.Account.Username.Eq(username)).First()
+	return dao.Account.Where(dao.Account.Username.Eq(username)).Take()
 }
 
 // UseWxMpOpenIDFindOne 使用微信 openid 查账号
 func (s *AccountService) UseWxMpOpenIDFindOne(openid string) (info *model.Account, err error) {
-	return dao.Account.Where(dao.Account.WxOpenId.Eq(openid)).First()
+	return dao.Account.Where(dao.Account.WxOpenId.Eq(openid)).Take()
 
 }
 

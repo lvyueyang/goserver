@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	DefaultSuccessMsg    = "success"
-	DefaultErrorMsg      = "success"
+	DefaultSuccessMsg    = "请求成功"
+	DefaultErrorMsg      = "请求失败"
 	DefaultParamErrorMsg = "请求参数错误"
 )
 
@@ -14,6 +14,11 @@ type Result struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
 	Data any    `json:"data"`
+}
+
+type RList struct {
+	Total int   `json:"total"`
+	List  []any `json:"list"`
 }
 
 // Success 成功返回

@@ -24,4 +24,4 @@ var AdminUserStatusMap = map[AdminUserStatus]string{
 	AdminUserStatusLocked: "封禁",
 }
 
-var ContextUserInfoKey = "user"
+var ContextUserInfoKey = "user" // 用于上下文中存储用户信息

@@ -3,5 +3,5 @@ IgnoreDirs = [".git", ".idea", "docs", "logs"]
 IgnoreFiles = ["server", "server.exe"]
 
 runs = [
-    "swag init",
+    "swag init --parseDependency",
 ]

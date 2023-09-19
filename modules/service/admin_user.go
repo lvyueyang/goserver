@@ -10,6 +10,7 @@ import (
 	"server/lib/errs"
 	"server/types"
 	"server/utils"
+	"strings"
 )
 
 type AdminUserService struct {
@@ -22,12 +23,35 @@ func NewAdminUserService() *AdminUserService {
 type FindUserListOption struct {
 	types.Pagination
 	types.Order
-	Keyword string `json:"keyword"`
+	Keyword string `json:"keyword" form:"keyword"`
 }
 
-func (s *AdminUserService) FindList(query FindUserListOption) ([]model.AdminUser, error) {
-	var find = dao.AdminUser.Where(dao.AdminUser.Username.Like("%" + query.Keyword + "%"))
-	return find.FindList(query.Order, utils.PaginationDefault(query.Pagination))
+func (s *AdminUserService) FindList(query FindUserListOption) (utils.ListResult[[]*model.AdminUser], error) {
+	fmt.Printf("query:%+v\n", query)
+	result := utils.ListResult[[]*model.AdminUser]{}
+	q := dao.AdminUser.Where(
+		dao.AdminUser.Username.Like("%" + query.Keyword + "%"),
+	).Or(
+		dao.AdminUser.Name.Like("%" + query.Keyword + "%"),
+	)
+
+	if query.OrderKey != "" {
+		col, _ := dao.AdminUser.GetFieldByName(query.OrderKey)
+		if strings.ToLower(query.OrderType) == "desc" {
+			q = q.Order(col.Desc())
+		} else {
+			q = q.Order(col)
+		}
+	}
+
+	if list, total, err := q.FindByPage(utils.PageTrans(query.Pagination)); err != nil {
+		return result, err
+	} else {
+		result.List = list
+		result.Total = total
+	}
+
+	return result, nil
 }
 
 type CreateAdminUser struct {
@@ -39,10 +63,10 @@ type CreateAdminUser struct {
 
 func (s *AdminUserService) Create(user model.AdminUser) (*model.AdminUser, error) {
 	var nilUser = new(model.AdminUser)
-	if _, err := dao.AdminUser.Where(dao.AdminUser.Username.Eq(user.Username)).First(); err == nil {
+	if _, err := dao.AdminUser.Where(dao.AdminUser.Username.Eq(user.Username)).Take(); err == nil {
 		return nilUser, errs.CreateServerError("用户名已存在", err, nil)
 	}
-	if _, err := dao.AdminUser.Where(dao.AdminUser.Email.Eq(user.Email)).First(); err == nil {
+	if _, err := dao.AdminUser.Where(dao.AdminUser.Email.Eq(user.Email)).Take(); err == nil {
 		return nilUser, errs.CreateServerError("邮箱已存在", err, nil)
 	}
 
@@ -57,6 +81,7 @@ func (s *AdminUserService) Create(user model.AdminUser) (*model.AdminUser, error
 	var data = &model.AdminUser{
 		Name:     user.Name,
 		Username: user.Username,
+		Avatar:   user.Avatar,
 		Password: string(hashPassword),
 		Email:    user.Email,
 		IsRoot:   false,
@@ -69,9 +94,46 @@ func (s *AdminUserService) Create(user model.AdminUser) (*model.AdminUser, error
 	return data, nil
 }
 
+func (s *AdminUserService) Update(id uint, user model.AdminUser) error {
+	if _, err := dao.AdminUser.FindByID(id); err != nil {
+		return errs.CreateServerError("用户不存在", err, nil)
+	}
+	data := model.AdminUser{
+		Name:   user.Name,
+		Avatar: user.Avatar,
+	}
+
+	if _, err := dao.AdminUser.Where(dao.AdminUser.ID.Eq(id)).Updates(data); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *AdminUserService) UpdatePassword(id uint, password string) error {
+	user, err := dao.AdminUser.FindByID(id)
+	if err != nil {
+		return errs.CreateServerError("用户不存在", err, nil)
+	}
+
+	return updateAdminUserPassword(user.ID, password)
+}
+
+func (s *AdminUserService) UpdateStatus(id uint, status consts.AdminUserStatus) error {
+	user, err := dao.AdminUser.FindByID(id)
+	if err != nil {
+		return errs.CreateServerError("用户不存在", err, nil)
+	}
+
+	if _, err := dao.AdminUser.Where(dao.AdminUser.ID.Eq(user.ID)).Update(dao.AdminUser.Status, status); err != nil {
+		return errs.CreateServerError("状态更新失败", err, status)
+	}
+
+	return nil
+}
+
 // CreateRootUser  创建超管账号
 func (s *AdminUserService) CreateRootUser(username, name, password, email string) (string, error) {
-	if _, err := dao.AdminUser.Where(dao.AdminUser.IsRoot).First(); err == nil {
+	if _, err := dao.AdminUser.Where(dao.AdminUser.IsRoot).Take(); err == nil {
 		return "", errs.CreateServerError("超管账户已存在禁止重复创建", err, nil)
 	}
 
@@ -104,20 +166,25 @@ func (s *AdminUserService) CreateRootUser(username, name, password, email string
 }
 
 func (s *AdminUserService) ResetPassword(email, password string) error {
-	if _, err := dao.AdminUser.Where(dao.AdminUser.Email.Eq(email)).First(); err != nil {
-		return errs.CreateServerError("用户名不存在", err, nil)
+	user, err := dao.AdminUser.Where(dao.AdminUser.Email.Eq(email)).Take()
+	if err != nil {
+		return errs.CreateServerError("用户不存在", err, nil)
 	}
 
+	return updateAdminUserPassword(user.ID, password)
+}
+
+func updateAdminUserPassword(id uint, password string) error {
 	// 密码加盐
 	var hashPassword []byte
 	if result, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost); err != nil {
-		return &errs.ServerError{Msg: "密码加盐失败", Err: err, Info: password}
+		return errs.CreateServerError("密码加盐失败", err, password)
 	} else {
 		hashPassword = result
 	}
 
-	if _, err := dao.AdminUser.Where(dao.AdminUser.Email.Eq(email)).Update(dao.AdminUser.Password, hashPassword); err != nil {
-		return err
+	if _, err := dao.AdminUser.Where(dao.AdminUser.ID.Eq(id)).Update(dao.AdminUser.Password, hashPassword); err != nil {
+		return errs.CreateServerError("密码更新失败", err, password)
 	}
 
 	return nil

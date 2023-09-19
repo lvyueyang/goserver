@@ -17,7 +17,7 @@ func NewCaptchaService() *CaptchaService {
 }
 
 func (s *CaptchaService) FindByID(id uint) (*model.Captcha, error) {
-	return dao.Captcha.Where(dao.Captcha.ID.Eq(id)).First()
+	return dao.Captcha.Where(dao.Captcha.ID.Eq(id)).Take()
 }
 
 // ValidateCode 验证手机/邮箱验证码
@@ -35,11 +35,16 @@ func validateCode(info model.Captcha, code string) (bool, error) {
 }
 
 // Validate 验证手机/邮箱验证码
-func (s *CaptchaService) Validate(current, code string, scenes consts.CaptchaScenes) (bool, error) {
-	info, err := dao.Captcha.Order(dao.Captcha.CreatedAt.Desc()).First()
+func (s *CaptchaService) Validate(current string, currentType consts.CaptchaType, code string, scenes consts.CaptchaScenes) (bool, error) {
+	info, err := dao.Captcha.Where(
+		dao.Captcha.Current.Eq(current),
+		dao.Captcha.CurrentType.Eq(uint(currentType)),
+		dao.Captcha.Code.Eq(code),
+		dao.Captcha.Scenes.Eq(uint(scenes)),
+	).Last()
 
 	if err != nil {
-		return false, errs.CreateClientError("验证码不存在", info)
+		return false, errs.CreateClientError("验证码错误", info)
 	}
 	return validateCode(*info, code)
 }

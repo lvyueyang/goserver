@@ -9,7 +9,7 @@ type FindListOption struct {
 	types.Order
 }
 
-func PaginationDefault(page types.Pagination) types.Pagination {
+func PageTrans(page types.Pagination) (offset int, limit int) {
 	current := page.Current
 	pageSize := page.PageSize
 	if current == 0 {
@@ -18,8 +18,10 @@ func PaginationDefault(page types.Pagination) types.Pagination {
 	if pageSize == 0 {
 		pageSize = 20
 	}
-	return types.Pagination{
-		Current:  current,
-		PageSize: pageSize,
-	}
+	return (current - 1) * pageSize, pageSize
+}
+
+type ListResult[T any] struct {
+	Total int64 `json:"total"`
+	List  T     `json:"list"`
 }

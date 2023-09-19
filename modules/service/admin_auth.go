@@ -19,7 +19,7 @@ func NewAdminAuthService() *AdminAuthService {
 
 func (s *AdminAuthService) UsernameAndPasswordLogin(username string, password string) (string, error) {
 	fmt.Println("username", username)
-	info, err := dao.AdminUser.Where(dao.AdminUser.Username.Eq(username)).First()
+	info, err := dao.AdminUser.Where(dao.AdminUser.Username.Eq(username)).Take()
 	if err != nil {
 		return "", &errs.ClientError{Msg: "用户未注册", Info: nil}
 	}
