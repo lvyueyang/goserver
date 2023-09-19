@@ -4,7 +4,6 @@ import (
 	"gorm.io/gen"
 	"server/config"
 	"server/db"
-	"server/types"
 )
 
 func main() {
@@ -26,20 +25,6 @@ func main() {
 }
 
 type CommonFindQuery interface {
-	// FindList // 查询列表
-	//
-	// SELECT *
-	// FROM @@table
-	// {{ if order.OrderKey != "" }}
-	//  {{ if order.OrderType == "desc"}}
-	//    ORDER BY @@order.OrderKey DESC
-	//  {{ else }}
-	//    ORDER BY @@order.OrderKey
-	//  {{ end }}
-	// {{ end }}
-	// LIMIT @limit
-	// OFFSET @offset
-	FindList(order types.Order, offset, limit int) (list []*gen.T, err error)
 
 	// FindByID // 根据 ID 查询
 	//

@@ -18,8 +18,6 @@ import (
 	"gorm.io/plugin/dbresolver"
 
 	"server/dal/model"
-
-	"server/types"
 )
 
 func newAdminUser(db *gorm.DB, opts ...gen.DOOption) adminUser {
@@ -191,55 +189,12 @@ type IAdminUserDo interface {
 	UnderlyingDB() *gorm.DB
 	schema.Tabler
 
-	FindList(order types.Order, offset int, limit int) (result []*model.AdminUser, err error)
 	FindByID(id uint) (result *model.AdminUser, err error)
-}
-
-// FindList // 查询列表
-//
-// SELECT *
-// FROM @@table
-// {{ if order.OrderKey != "" }}
-// {{ if order.OrderType == "desc"}}
-//
-//	ORDER BY @@order.OrderKey DESC
-//
-// {{ else }}
-//
-//	ORDER BY @@order.OrderKey
-//
-// {{ end }}
-// {{ end }}
-// LIMIT @limit
-// OFFSET @offset
-func (a adminUserDo) FindList(order types.Order, offset int, limit int) (result []*model.AdminUser, err error) {
-	var params []interface{}
-
-	var generateSQL strings.Builder
-	generateSQL.WriteString("SELECT * FROM admin_user ")
-	if order.OrderKey != "" {
-		if order.OrderType == "desc" {
-			generateSQL.WriteString("ORDER BY " + a.Quote(order.OrderKey) + " DESC ")
-		} else {
-			generateSQL.WriteString("ORDER BY " + a.Quote(order.OrderKey) + " ")
-		}
-	}
-	params = append(params, limit)
-	params = append(params, offset)
-	generateSQL.WriteString("LIMIT ? OFFSET ? ")
-
-	var executeSQL *gorm.DB
-	executeSQL = a.UnderlyingDB().Raw(generateSQL.String(), params...).Find(&result) // ignore_security_alert
-	err = executeSQL.Error
-
-	return
 }
 
 // FindByID // 根据 ID 查询
 //
-// SELECT *
-// FROM @@table
-// WHERE id=@id
+// SELECT * FROM @@table WHERE id=@id
 func (a adminUserDo) FindByID(id uint) (result *model.AdminUser, err error) {
 	var params []interface{}
 
