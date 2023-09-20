@@ -354,9 +354,9 @@ paths:
           description: resp
           schema:
             $ref: '#/definitions/resp.Result'
-      summary: 管理后台-
+      summary: 忘记密码
       tags:
-      - 管理后台-管理员用户
+      - 管理后台-用户认证
   /api/admin/auth/init-root-user:
     post:
       consumes:
@@ -382,7 +382,7 @@ paths:
               type: object
       summary: 初始化超级管理员用户
       tags:
-      - 管理后台-管理员用户
+      - 管理后台-用户认证
   /api/admin/auth/login:
     post:
       consumes:
@@ -408,7 +408,7 @@ paths:
               type: object
       summary: 用户登录
       tags:
-      - 管理后台-管理员用户
+      - 管理后台-用户认证
   /api/admin/role:
     get:
       consumes:
@@ -635,29 +635,23 @@ paths:
       tags:
       - 管理后台-管理员用户
   /api/admin/user/{id}:
-    get:
+    delete:
       consumes:
       - application/json
       parameters:
-      - description: 管理员信息
-        in: body
-        name: req
+      - description: 管理员ID
+        in: path
+        name: id
         required: true
-        schema:
-          $ref: '#/definitions/api.CreateAdminUserBodyDto'
+        type: number
       produces:
       - application/json
       responses:
         "200":
-          description: 用户详情
+          description: resp
           schema:
-            allOf:
-            - $ref: '#/definitions/resp.Result'
-            - properties:
-                data:
-                  $ref: '#/definitions/model.AdminUser'
-              type: object
-      summary: 管理员详情
+            $ref: '#/definitions/resp.Result'
+      summary: 删除管理员
       tags:
       - 管理后台-管理员用户
     put:
@@ -698,7 +692,7 @@ paths:
               type: object
       summary: 当前登陆者信息
       tags:
-      - 管理后台-管理员用户
+      - 管理后台-用户认证
   /api/admin/user/list:
     get:
       consumes:
@@ -760,6 +754,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - description: 管理员ID
+        in: path
+        name: id
+        required: true
+        type: number
       - description: 用户状态
         in: body
         name: req

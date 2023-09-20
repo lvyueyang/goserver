@@ -25,9 +25,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "管理后台-管理员用户"
+                    "管理后台-用户认证"
                 ],
-                "summary": "管理后台-",
+                "summary": "忘记密码",
                 "parameters": [
                     {
                         "description": "body",
@@ -58,7 +58,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "管理后台-管理员用户"
+                    "管理后台-用户认证"
                 ],
                 "summary": "初始化超级管理员用户",
                 "parameters": [
@@ -103,7 +103,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "管理后台-管理员用户"
+                    "管理后台-用户认证"
                 ],
                 "summary": "用户登录",
                 "parameters": [
@@ -514,7 +514,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "管理后台-管理员用户"
+                    "管理后台-用户认证"
                 ],
                 "summary": "当前登陆者信息",
                 "responses": {
@@ -641,6 +641,13 @@ const docTemplate = `{
                 "summary": "修改管理员状态(封禁/解封)",
                 "parameters": [
                     {
+                        "type": "number",
+                        "description": "管理员ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "用户状态",
                         "name": "req",
                         "in": "body",
@@ -661,49 +668,6 @@ const docTemplate = `{
             }
         },
         "/api/admin/user/{id}": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "管理后台-管理员用户"
-                ],
-                "summary": "管理员详情",
-                "parameters": [
-                    {
-                        "description": "管理员信息",
-                        "name": "req",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.CreateAdminUserBodyDto"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "用户详情",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/resp.Result"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/model.AdminUser"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
             "put": {
                 "consumes": [
                     "application/json"
@@ -724,6 +688,35 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/api.UpdateAdminUserBodyDto"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "resp",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Result"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理后台-管理员用户"
+                ],
+                "summary": "删除管理员",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "管理员ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {

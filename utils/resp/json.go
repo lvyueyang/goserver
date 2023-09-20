@@ -64,6 +64,11 @@ func AuthErr(msg string) (int, Result) {
 	return http.StatusUnauthorized, Err(nil, msg, http.StatusUnauthorized)
 }
 
+// ForbiddenErr 权限错误
+func ForbiddenErr(msg string) (int, Result) {
+	return http.StatusForbidden, Err(nil, msg, http.StatusForbidden)
+}
+
 func ParseErr(err error) (int, Result) {
 	return ServerErr(err, err.Error(), http.StatusBadRequest)
 }

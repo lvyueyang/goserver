@@ -27,7 +27,7 @@ func NewAdminAuthController(e *gin.Engine) {
 // Login
 //
 //	@Summary	用户登录
-//	@Tags		管理后台-管理员用户
+//	@Tags		管理后台-用户认证
 //	@Accept		json
 //	@Produce	json
 //	@Param		req	body		adminUserLoginBodyDto							true	"body"
@@ -50,7 +50,7 @@ func (c *AdminAuthController) Login(ctx *gin.Context) {
 // InitRootUser
 //
 //	@Summary	初始化超级管理员用户
-//	@Tags		管理后台-管理员用户
+//	@Tags		管理后台-用户认证
 //	@Accept		json
 //	@Produce	json
 //	@Param		req	body		adminInitRootUserBodyDto						true	"body"
@@ -74,7 +74,7 @@ func (c *AdminAuthController) InitRootUser(ctx *gin.Context) {
 // ForgetPassword
 //
 //	@Summary	忘记密码
-//	@Tags		管理后台-管理员用户
+//	@Tags		管理后台-用户认证
 //	@Accept		json
 //	@Produce	json
 //	@Param		req	body		adminUserForgetPasswordBodyDto	true	"body"

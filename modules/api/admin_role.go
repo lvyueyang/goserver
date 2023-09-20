@@ -7,6 +7,7 @@ import (
 	"server/dal/dbtypes"
 	"server/dal/model"
 	"server/lib/valid"
+	"server/middleware"
 	"server/modules/service"
 	"server/utils/resp"
 	"strconv"
@@ -21,12 +22,12 @@ func NewAdminRoleController(e *gin.Engine) {
 		service: service.NewAdminRoleService(),
 	}
 	admin := e.Group("/api/admin/role")
-	admin.GET("", c.FindList)
-	admin.POST("", c.Create)
-	admin.PUT("", c.Update)
-	admin.DELETE("/:id", c.Delete)
 	admin.GET("/permission/codes", c.FindPermissionCodes)
-	admin.PUT("/permission/codes", c.UpdatePermissionCodes)
+	admin.GET("", middleware.AdminRole(permission.AdminRoleFind), c.FindList)
+	admin.POST("", middleware.AdminRole(permission.AdminRoleCreate), c.Create)
+	admin.PUT("", middleware.AdminRole(permission.AdminRoleUpdateInfo), c.Update)
+	admin.DELETE("/:id", middleware.AdminRole(permission.AdminRoleDelete), c.Delete)
+	admin.PUT("/permission/codes", middleware.AdminRole(permission.AdminRoleUpdateCode), c.UpdatePermissionCodes)
 }
 
 // FindList

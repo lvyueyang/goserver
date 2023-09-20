@@ -108,6 +108,21 @@ func (s *AdminUserService) Update(id uint, user model.AdminUser) error {
 	return nil
 }
 
+func (s *AdminUserService) Delete(id uint) error {
+	if user, err := dao.AdminUser.FindByID(id); err != nil {
+		return errs.CreateServerError("用户不存在", err, nil)
+	} else {
+		if user.IsRoot {
+			return errs.CreateClientError("禁止删除超级管理员", nil)
+		}
+	}
+
+	if _, err := dao.AdminUser.Where(dao.AdminUser.ID.Eq(id)).Delete(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *AdminUserService) UpdatePassword(id uint, password string) error {
 	user, err := dao.AdminUser.FindByID(id)
 	if err != nil {
@@ -177,6 +192,9 @@ func (s *AdminUserService) AddRole(userID uint, roleIDs []uint) error {
 	if err != nil {
 		return errs.CreateServerError("用户不存在", err, nil)
 	}
+	if user.IsRoot {
+		return errs.CreateClientError("超管用户禁止更新角色", nil)
+	}
 	roles, err := dao.AdminRole.Where(dao.AdminRole.ID.In(roleIDs...)).Find()
 	if err != nil {
 		return errs.CreateServerError("角色不存在", err, nil)
@@ -189,6 +207,9 @@ func (s *AdminUserService) DeleteRole(userID uint, roleIDs []uint) error {
 	user, err := dao.AdminUser.FindByID(userID)
 	if err != nil {
 		return errs.CreateServerError("用户不存在", err, nil)
+	}
+	if user.IsRoot {
+		return errs.CreateClientError("超管用户禁止更新角色", nil)
 	}
 	roles, err := dao.AdminRole.Where(dao.AdminRole.ID.In(roleIDs...)).Find()
 	if err != nil {
@@ -203,6 +224,9 @@ func (s *AdminUserService) UpdateRole(userID uint, roleIDs []uint) error {
 	if err != nil {
 		return errs.CreateServerError("用户不存在", err, nil)
 	}
+	if user.IsRoot {
+		return errs.CreateClientError("超管用户禁止更新角色", nil)
+	}
 	roles, err := dao.AdminRole.Where(dao.AdminRole.ID.In(roleIDs...)).Find()
 	if err != nil {
 		return errs.CreateServerError("角色不存在", err, nil)
@@ -213,6 +237,18 @@ func (s *AdminUserService) UpdateRole(userID uint, roleIDs []uint) error {
 	}
 
 	return dao.AdminUser.Roles.Model(user).Append(roles...)
+}
+
+// 用于验证是否为超管用户在操作自己的账号
+func (s *AdminUserService) OnlyRootAdminUser(userID, currentID uint) error {
+	user, err := dao.AdminUser.FindByID(userID)
+	if err != nil {
+		return errs.CreateServerError("用户不存在", err, nil)
+	}
+	if user.IsRoot && userID != currentID {
+		return errs.CreateClientError("超管用户信息仅超管本人可以修改", nil)
+	}
+	return nil
 }
 
 func updateAdminUserPassword(id uint, password string) error {
