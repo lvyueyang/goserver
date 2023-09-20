@@ -56,6 +56,6 @@ var AdminLabelMap = map[string]LabelType{
 		Label: "删除管理角色",
 	},
 	AdminRoleUpdateCode: {
-		Label: "修改管理角色权限码列表",
+		Label: "修改管理角色权限码",
 	},
 }
