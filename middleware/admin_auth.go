@@ -68,6 +68,10 @@ func isAdminLogin(c *gin.Context) (*model.AdminUser, error) {
 }
 
 func isPermission(user *model.AdminUser, code string) error {
+	// 超管直接绕过权限认证
+	if user.IsRoot == true {
+		return nil
+	}
 	codeMap := make(map[string]bool)
 
 	for _, role := range user.Roles {
