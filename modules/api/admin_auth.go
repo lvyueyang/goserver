@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"server/consts"
 	"server/lib/valid"
 	"server/modules/service"
 	"server/utils/resp"
@@ -11,12 +12,14 @@ import (
 type AdminAuthController struct {
 	service          *service.AdminAuthService
 	adminUserService *service.AdminUserService
+	captchaService   *service.CaptchaService
 }
 
 func NewAdminAuthController(e *gin.Engine) {
 	c := &AdminAuthController{
 		service:          service.NewAdminAuthService(),
 		adminUserService: service.NewAdminUserService(),
+		captchaService:   service.NewCaptchaService(),
 	}
 	router := e.Group("/api/admin/auth")
 	router.POST("/login", c.Login)
@@ -84,6 +87,11 @@ func (c *AdminAuthController) ForgetPassword(ctx *gin.Context) {
 	var body = new(adminUserForgetPasswordBodyDto)
 	if err := ctx.ShouldBindBodyWith(body, binding.JSON); err != nil {
 		ctx.JSON(resp.ParamErr(valid.ErrTransform(err)))
+		return
+	}
+
+	if ok, err := c.captchaService.Validate(body.Email, consts.CaptchaTypeEmail, body.Captcha, consts.CaptchaScenesForgetPassword); ok == false {
+		ctx.JSON(resp.ParamErr(err.Error()))
 		return
 	}
 

@@ -830,7 +830,7 @@ const docTemplate = `{
                 "tags": [
                     "验证码"
                 ],
-                "summary": "获取验证码图片",
+                "summary": "发送验证码",
                 "parameters": [
                     {
                         "description": "body",
@@ -838,15 +838,27 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.CreateCaptchaReqDto"
+                            "$ref": "#/definitions/api.CreateCaptchaBodyDto"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "请求结果",
+                        "description": "验证码 ID",
                         "schema": {
-                            "$ref": "#/definitions/resp.Result"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resp.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -883,7 +895,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/captcha/verify/{id}": {
+        "/api/captcha/image": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -894,10 +906,53 @@ const docTemplate = `{
                 "tags": [
                     "验证码"
                 ],
-                "summary": "获取图片验证码",
+                "summary": "获取图片验证码的 key",
                 "responses": {
                     "200": {
-                        "description": "验证码图片",
+                        "description": "验证码图片的key",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resp.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/captcha/image/{key}": {
+            "get": {
+                "consumes": [
+                    "image/png"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "验证码"
+                ],
+                "summary": "获取验证码图片",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "图片验证码 key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "图片文件流",
                         "schema": {
                             "type": "string"
                         }
@@ -1043,7 +1098,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api.CreateCaptchaReqDto": {
+        "api.CreateCaptchaBodyDto": {
             "type": "object",
             "required": [
                 "captcha_key",
@@ -1062,7 +1117,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "scenes": {
-                    "description": "使用场景， 1-注册",
+                    "description": "使用场景， 1-注册 2-忘记密码 3-修改手机 4-修改邮箱",
                     "allOf": [
                         {
                             "$ref": "#/definitions/consts.CaptchaScenes"
@@ -1070,7 +1125,7 @@ const docTemplate = `{
                     ]
                 },
                 "type": {
-                    "description": "验证码类型， 1-手机 2-邮箱 Enums(1,2)",
+                    "description": "验证码类型， 1-手机 2-邮箱",
                     "allOf": [
                         {
                             "$ref": "#/definitions/consts.CaptchaType"
@@ -1320,13 +1375,22 @@ const docTemplate = `{
         "consts.CaptchaScenes": {
             "type": "integer",
             "enum": [
-                1
+                1,
+                2,
+                3,
+                4
             ],
             "x-enum-comments": {
-                "CaptchaScenesRegister": "注册"
+                "CaptchaScenesForgetPassword": "忘记密码",
+                "CaptchaScenesRegister": "注册",
+                "CaptchaScenesUpdateEmail": "更新邮箱",
+                "CaptchaScenesUpdatePhone": "更新手机号"
             },
             "x-enum-varnames": [
-                "CaptchaScenesRegister"
+                "CaptchaScenesRegister",
+                "CaptchaScenesForgetPassword",
+                "CaptchaScenesUpdatePhone",
+                "CaptchaScenesUpdateEmail"
             ]
         },
         "consts.CaptchaType": {

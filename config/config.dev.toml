@@ -32,3 +32,12 @@ password = "Lv12345678"
 port = 3306
 dbname = "cms_dev"
 
+
+# 邮箱配置信息
+[email]
+host="smtp.163.com"
+port=25
+secure=true
+user=""
+password=""
+from="" # 发件人邮箱

@@ -51,7 +51,7 @@ definitions:
     - password
     - username
     type: object
-  api.CreateCaptchaReqDto:
+  api.CreateCaptchaBodyDto:
     properties:
       captcha_key:
         description: 图形验证码的key
@@ -62,11 +62,11 @@ definitions:
       scenes:
         allOf:
         - $ref: '#/definitions/consts.CaptchaScenes'
-        description: 使用场景， 1-注册
+        description: 使用场景， 1-注册 2-忘记密码 3-修改手机 4-修改邮箱
       type:
         allOf:
         - $ref: '#/definitions/consts.CaptchaType'
-        description: 验证码类型， 1-手机 2-邮箱 Enums(1,2)
+        description: 验证码类型， 1-手机 2-邮箱
       value:
         description: 手机/邮箱账号
         type: string
@@ -243,11 +243,20 @@ definitions:
   consts.CaptchaScenes:
     enum:
     - 1
+    - 2
+    - 3
+    - 4
     type: integer
     x-enum-comments:
+      CaptchaScenesForgetPassword: 忘记密码
       CaptchaScenesRegister: 注册
+      CaptchaScenesUpdateEmail: 更新邮箱
+      CaptchaScenesUpdatePhone: 更新手机号
     x-enum-varnames:
     - CaptchaScenesRegister
+    - CaptchaScenesForgetPassword
+    - CaptchaScenesUpdatePhone
+    - CaptchaScenesUpdateEmail
   consts.CaptchaType:
     enum:
     - 1
@@ -837,15 +846,20 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/api.CreateCaptchaReqDto'
+          $ref: '#/definitions/api.CreateCaptchaBodyDto'
       produces:
       - application/json
       responses:
         "200":
-          description: 请求结果
+          description: 验证码 ID
           schema:
-            $ref: '#/definitions/resp.Result'
-      summary: 获取验证码图片
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  type: integer
+              type: object
+      summary: 发送验证码
       tags:
       - 验证码
   /api/captcha/clear:
@@ -868,7 +882,7 @@ paths:
       summary: 清除过期验证码
       tags:
       - 验证码
-  /api/captcha/verify/{id}:
+  /api/captcha/image:
     get:
       consumes:
       - application/json
@@ -876,10 +890,35 @@ paths:
       - application/json
       responses:
         "200":
-          description: 验证码图片
+          description: 验证码图片的key
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 获取图片验证码的 key
+      tags:
+      - 验证码
+  /api/captcha/image/{key}:
+    get:
+      consumes:
+      - image/png
+      parameters:
+      - description: 图片验证码 key
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 图片文件流
           schema:
             type: string
-      summary: 获取图片验证码
+      summary: 获取验证码图片
       tags:
       - 验证码
   /api/cli/module/create:
