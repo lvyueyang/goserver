@@ -248,7 +248,7 @@ definitions:
     - 4
     type: integer
     x-enum-comments:
-      CaptchaScenesForgetPassword: 忘记密码
+      CaptchaScenesForgetPassword: 密码重置
       CaptchaScenesRegister: 注册
       CaptchaScenesUpdateEmail: 更新邮箱
       CaptchaScenesUpdatePhone: 更新手机号
@@ -784,6 +784,31 @@ paths:
       summary: 修改管理员状态(封禁/解封)
       tags:
       - 管理后台-管理员用户
+  /api/admin/user/upload:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 文件地址
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 文件上传
+      tags:
+      - 管理后台-通用接口
   /api/auth/login:
     post:
       consumes:

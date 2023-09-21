@@ -4,6 +4,9 @@ env = "development"
 # 端口
 port = 4002
 
+# 文件上传路径
+file_upload_dir="E:/project/go/uploadfile"
+
 # 日志
 [log]
 output = "/Users/lyy/code/project/goserver/logs"

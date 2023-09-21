@@ -667,6 +667,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/admin/user/upload": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理后台-通用接口"
+                ],
+                "summary": "文件上传",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "文件地址",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resp.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/admin/user/{id}": {
             "put": {
                 "consumes": [
@@ -1381,7 +1424,7 @@ const docTemplate = `{
                 4
             ],
             "x-enum-comments": {
-                "CaptchaScenesForgetPassword": "忘记密码",
+                "CaptchaScenesForgetPassword": "密码重置",
                 "CaptchaScenesRegister": "注册",
                 "CaptchaScenesUpdateEmail": "更新邮箱",
                 "CaptchaScenesUpdatePhone": "更新手机号"

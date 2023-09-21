@@ -2,6 +2,9 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
+	"path"
+	"server/config"
+	"server/consts"
 	"server/modules/api"
 )
 
@@ -10,6 +13,8 @@ type Controller interface {
 }
 
 func New(r *gin.Engine) {
+	r.Static(consts.UploadFilePathName, path.Join(config.Config.FileUploadDir))
+
 	api.NewSwaggerController(r)
 
 	api.NewHomeController(r)

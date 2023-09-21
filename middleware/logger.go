@@ -49,7 +49,7 @@ func loggerMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 开始时间
 		start := time.Now()
-		bodyJson := body2string(c)
+		//bodyJson := body2string(c) // 暂不使用，会导致文件上传无法获取到文件流
 
 		writer := responseWriter{
 			c.Writer,
@@ -69,7 +69,7 @@ func loggerMiddleware() gin.HandlerFunc {
 			Response:     writer.b.String(),
 			Path:         c.Request.URL.Path,
 			Query:        c.Request.URL.RawQuery,
-			Body:         bodyJson,
+			//Body:         bodyJson,
 		}
 
 		// 结束时间

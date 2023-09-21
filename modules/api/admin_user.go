@@ -1,8 +1,11 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"path"
+	"server/config"
 	"server/consts"
 	"server/consts/permission"
 	"server/dal/model"
@@ -31,6 +34,7 @@ func NewAdminUserController(e *gin.Engine) {
 	admin.PUT("/reset-password/:id", middleware.AdminRole(permission.AdminUserUpdatePassword), c.ResetPassword)
 	admin.PUT("/status/:id", middleware.AdminRole(permission.AdminUserUpdateStatus), c.UpdateStatus)
 	admin.PUT("/role", middleware.AdminRole(permission.AdminUserUpdateRole), c.UpdateRole)
+	admin.POST("/upload", middleware.AdminRole(permission.AdminUserUploadFile), c.Upload)
 }
 
 // FindList
@@ -218,6 +222,34 @@ func (c *AdminUserController) UpdateRole(ctx *gin.Context) {
 func (c *AdminUserController) CurrentInfo(ctx *gin.Context) {
 	user := ctx.MustGet(consts.ContextUserInfoKey).(*model.AdminUser)
 	ctx.JSON(resp.Succ(user))
+}
+
+// Upload
+//
+//	@Summary	文件上传
+//	@Tags		管理后台-通用接口
+//	@Accept		json
+//	@Produce	json
+//	@Param		file	formData		file	true	"文件"
+//	@Success	200	{object}	resp.Result{data=string}	"文件地址"
+//	@Router		/api/admin/user/upload [post]
+func (c *AdminUserController) Upload(ctx *gin.Context) {
+	user := ctx.MustGet(consts.ContextUserInfoKey).(*model.AdminUser)
+	file, errF := ctx.FormFile("file")
+	if errF != nil {
+		ctx.JSON(resp.ParseErr(errF))
+		return
+	}
+	filePath := strconv.Itoa(int(user.ID)) + "/" + file.Filename
+	fmt.Println(config.Config.FileUploadDir)
+	dst := path.Join(config.Config.FileUploadDir + "/" + filePath)
+	fmt.Println(dst)
+	// 上传文件至指定的完整文件路径
+	if err := ctx.SaveUploadedFile(file, dst); err != nil {
+		ctx.JSON(resp.ParseErr(err))
+		return
+	}
+	ctx.JSON(resp.Succ("/" + consts.UploadFilePathName + "/" + filePath))
 }
 
 type CreateAdminUserBodyDto struct {

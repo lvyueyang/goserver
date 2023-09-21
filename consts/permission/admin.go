@@ -12,6 +12,7 @@ const (
 	AdminUserUpdateStatus   string = "admin:user:update:status"
 	AdminUserUpdatePassword string = "admin:user:update:password"
 	AdminUserUpdateRole     string = "admin:user:update:role"
+	AdminUserUploadFile     string = "admin:user:upload:file"
 
 	AdminRoleFind       string = "admin:role:find:list"
 	AdminRoleCreate     string = "admin:role:create"
@@ -41,6 +42,9 @@ var AdminLabelMap = map[string]LabelType{
 	},
 	AdminUserUpdateRole: {
 		Label: "修改管理员角色",
+	},
+	AdminUserUploadFile: {
+		Label: "上传文件到本地",
 	},
 
 	AdminRoleFind: {

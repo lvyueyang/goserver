@@ -27,6 +27,13 @@ func New() {
 
 	Config.IsDev = Config.Env == string(consts.EnvDev)
 	Config.IsProd = Config.Env == string(consts.EnvProd)
+	// 判断文件夹是否存在
+	if !fileutil.IsExist(Config.FileUploadDir) {
+		// 创建文件夹
+		fileutil.CreateDir(Config.FileUploadDir)
+	}
+
+	//fmt.Printf("Config: %+v\n", Config)
 }
 
 // GetLoggerOutPutPath 获取日志输出路径
