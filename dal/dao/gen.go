@@ -21,6 +21,7 @@ var (
 	AdminRole *adminRole
 	AdminUser *adminUser
 	Captcha   *captcha
+	News      *news
 	User      *user
 )
 
@@ -30,6 +31,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	AdminRole = &Q.AdminRole
 	AdminUser = &Q.AdminUser
 	Captcha = &Q.Captcha
+	News = &Q.News
 	User = &Q.User
 }
 
@@ -40,6 +42,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		AdminRole: newAdminRole(db, opts...),
 		AdminUser: newAdminUser(db, opts...),
 		Captcha:   newCaptcha(db, opts...),
+		News:      newNews(db, opts...),
 		User:      newUser(db, opts...),
 	}
 }
@@ -51,6 +54,7 @@ type Query struct {
 	AdminRole adminRole
 	AdminUser adminUser
 	Captcha   captcha
+	News      news
 	User      user
 }
 
@@ -63,6 +67,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		AdminRole: q.AdminRole.clone(db),
 		AdminUser: q.AdminUser.clone(db),
 		Captcha:   q.Captcha.clone(db),
+		News:      q.News.clone(db),
 		User:      q.User.clone(db),
 	}
 }
@@ -82,6 +87,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		AdminRole: q.AdminRole.replaceDB(db),
 		AdminUser: q.AdminUser.replaceDB(db),
 		Captcha:   q.Captcha.replaceDB(db),
+		News:      q.News.replaceDB(db),
 		User:      q.User.replaceDB(db),
 	}
 }
@@ -91,6 +97,7 @@ type queryCtx struct {
 	AdminRole IAdminRoleDo
 	AdminUser IAdminUserDo
 	Captcha   ICaptchaDo
+	News      INewsDo
 	User      IUserDo
 }
 
@@ -100,6 +107,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		AdminRole: q.AdminRole.WithContext(ctx),
 		AdminUser: q.AdminUser.WithContext(ctx),
 		Captcha:   q.Captcha.WithContext(ctx),
+		News:      q.News.WithContext(ctx),
 		User:      q.User.WithContext(ctx),
 	}
 }

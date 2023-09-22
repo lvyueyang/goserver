@@ -47,7 +47,7 @@ func NewCaptchaController(e *gin.Engine) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		req	body		CreateCaptchaBodyDto	true	"body"
-//	@Success	200	{object}	resp.Result{data=int}			"验证码 ID"
+//	@Success	200	{object}	resp.Result{data=int}	"验证码 ID"
 //	@Router		/api/captcha [post]
 func (c *CaptchaController) Create(ctx *gin.Context) {
 	var body = new(CreateCaptchaBodyDto)

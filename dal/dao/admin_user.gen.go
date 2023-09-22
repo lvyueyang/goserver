@@ -39,17 +39,31 @@ func newAdminUser(db *gorm.DB, opts ...gen.DOOption) adminUser {
 	_adminUser.Avatar = field.NewString(tableName, "avatar")
 	_adminUser.IsRoot = field.NewBool(tableName, "is_root")
 	_adminUser.Status = field.NewInt8(tableName, "status")
+	_adminUser.News = adminUserHasManyNews{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("News", "model.News"),
+	}
+
 	_adminUser.Roles = adminUserManyToManyRoles{
 		db: db.Session(&gorm.Session{}),
 
 		RelationField: field.NewRelation("Roles", "model.AdminRole"),
 		Users: struct {
 			field.RelationField
+			News struct {
+				field.RelationField
+			}
 			Roles struct {
 				field.RelationField
 			}
 		}{
 			RelationField: field.NewRelation("Roles.Users", "model.AdminUser"),
+			News: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Roles.Users.News", "model.News"),
+			},
 			Roles: struct {
 				field.RelationField
 			}{
@@ -78,7 +92,9 @@ type adminUser struct {
 	Avatar    field.String
 	IsRoot    field.Bool
 	Status    field.Int8
-	Roles     adminUserManyToManyRoles
+	News      adminUserHasManyNews
+
+	Roles adminUserManyToManyRoles
 
 	fieldMap map[string]field.Expr
 }
@@ -122,7 +138,7 @@ func (a *adminUser) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *adminUser) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 12)
+	a.fieldMap = make(map[string]field.Expr, 13)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -147,6 +163,77 @@ func (a adminUser) replaceDB(db *gorm.DB) adminUser {
 	return a
 }
 
+type adminUserHasManyNews struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a adminUserHasManyNews) Where(conds ...field.Expr) *adminUserHasManyNews {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a adminUserHasManyNews) WithContext(ctx context.Context) *adminUserHasManyNews {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a adminUserHasManyNews) Session(session *gorm.Session) *adminUserHasManyNews {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a adminUserHasManyNews) Model(m *model.AdminUser) *adminUserHasManyNewsTx {
+	return &adminUserHasManyNewsTx{a.db.Model(m).Association(a.Name())}
+}
+
+type adminUserHasManyNewsTx struct{ tx *gorm.Association }
+
+func (a adminUserHasManyNewsTx) Find() (result []*model.News, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a adminUserHasManyNewsTx) Append(values ...*model.News) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a adminUserHasManyNewsTx) Replace(values ...*model.News) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a adminUserHasManyNewsTx) Delete(values ...*model.News) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a adminUserHasManyNewsTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a adminUserHasManyNewsTx) Count() int64 {
+	return a.tx.Count()
+}
+
 type adminUserManyToManyRoles struct {
 	db *gorm.DB
 
@@ -154,6 +241,9 @@ type adminUserManyToManyRoles struct {
 
 	Users struct {
 		field.RelationField
+		News struct {
+			field.RelationField
+		}
 		Roles struct {
 			field.RelationField
 		}

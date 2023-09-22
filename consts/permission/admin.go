@@ -19,6 +19,12 @@ const (
 	AdminRoleUpdateInfo string = "admin:role:update:info"
 	AdminRoleUpdateCode string = "admin:role:update:code"
 	AdminRoleDelete     string = "admin:role:delete"
+
+	AdminNewsFind       string = "admin:news:find:list"
+	AdminNewsFindDetail string = "admin:news:find:detail"
+	AdminNewsCreate     string = "admin:news:create"
+	AdminNewsUpdateInfo string = "admin:news:update:info"
+	AdminNewsDelete     string = "admin:news:delete"
 )
 
 var AdminLabelMap = map[string]LabelType{
@@ -61,5 +67,21 @@ var AdminLabelMap = map[string]LabelType{
 	},
 	AdminRoleUpdateCode: {
 		Label: "修改管理角色权限码",
+	},
+
+	AdminNewsFind: {
+		Label: "查询新闻列表",
+	},
+	AdminNewsFindDetail: {
+		Label: "查询新闻详情",
+	},
+	AdminNewsCreate: {
+		Label: "创建新闻",
+	},
+	AdminNewsUpdateInfo: {
+		Label: "修改新闻信息",
+	},
+	AdminNewsDelete: {
+		Label: "删除新闻",
 	},
 }

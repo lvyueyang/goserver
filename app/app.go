@@ -27,4 +27,7 @@ func New(r *gin.Engine) {
 	api.NewAdminUserController(r)
 	api.NewAdminAuthController(r)
 	api.NewAdminRoleController(r)
+
+	api.NewNewsController(r)
+
 }

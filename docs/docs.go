@@ -139,6 +139,227 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/admin/news": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理后台-新闻"
+                ],
+                "summary": "新闻列表",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "default": 1,
+                        "description": "当前页",
+                        "name": "current",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "default": 20,
+                        "description": "每页条数",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "需要排序的列",
+                        "name": "order_key",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "ase",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "排序方式",
+                        "name": "order_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "按名称或ID搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "resp",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resp.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/resp.RList"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "list": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/model.News"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理后台-新闻"
+                ],
+                "summary": "修改新闻",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateNewsBodyDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "resp",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Result"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理后台-新闻"
+                ],
+                "summary": "新增新闻",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateNewsBodyDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "resp",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/news/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理后台-新闻"
+                ],
+                "summary": "新闻详情",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "resp",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/resp.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.News"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "管理后台-新闻"
+                ],
+                "summary": "删除新闻",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "resp",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Result"
+                        }
+                    }
+                }
+            }
+        },
         "/api/admin/role": {
             "get": {
                 "consumes": [
@@ -1181,6 +1402,34 @@ const docTemplate = `{
                 }
             }
         },
+        "api.CreateNewsBodyDto": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "cover": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "push_date": {
+                    "description": "发布日期 YYYY-MM-DD HH:mm:ss",
+                    "type": "string"
+                },
+                "recommend": {
+                    "description": "推荐等级 0 为不推荐，数值越大越靠前",
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "api.ResetPasswordAdminUserBodyDto": {
             "type": "object",
             "required": [
@@ -1271,6 +1520,39 @@ const docTemplate = `{
                             "$ref": "#/definitions/consts.AdminUserStatus"
                         }
                     ]
+                }
+            }
+        },
+        "api.UpdateNewsBodyDto": {
+            "type": "object",
+            "required": [
+                "id",
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "cover": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "角色 ID",
+                    "type": "integer"
+                },
+                "push_date": {
+                    "description": "发布日期 YYYY-MM-DD HH:mm:ss",
+                    "type": "string"
+                },
+                "recommend": {
+                    "description": "推荐等级 0 为不推荐，数值越大越靠前",
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -1510,6 +1792,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "news": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.News"
+                    }
+                },
                 "roles": {
                     "type": "array",
                     "items": {
@@ -1523,6 +1811,45 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.News": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "description": "作者",
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "cover": {
+                    "description": "封面",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "push_date": {
+                    "description": "发布日期",
+                    "type": "string"
+                },
+                "recommend": {
+                    "description": "推荐等级",
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }

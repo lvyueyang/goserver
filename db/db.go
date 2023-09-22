@@ -20,6 +20,8 @@ var Models = []any{
 	model.Captcha{},
 	model.AdminUser{},
 	model.AdminRole{},
+	// 附加业务
+	model.News{},
 }
 
 func New() {

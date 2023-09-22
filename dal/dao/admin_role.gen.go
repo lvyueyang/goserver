@@ -40,6 +40,11 @@ func newAdminRole(db *gorm.DB, opts ...gen.DOOption) adminRole {
 		db: db.Session(&gorm.Session{}),
 
 		RelationField: field.NewRelation("Users", "model.AdminUser"),
+		News: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("Users.News", "model.News"),
+		},
 		Roles: struct {
 			field.RelationField
 			Users struct {
@@ -140,6 +145,9 @@ type adminRoleManyToManyUsers struct {
 
 	field.RelationField
 
+	News struct {
+		field.RelationField
+	}
 	Roles struct {
 		field.RelationField
 		Users struct {

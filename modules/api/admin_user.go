@@ -12,6 +12,7 @@ import (
 	"server/lib/valid"
 	"server/middleware"
 	"server/modules/service"
+	"server/utils"
 	"server/utils/resp"
 	"strconv"
 )
@@ -172,7 +173,7 @@ func (c *AdminUserController) ResetPassword(ctx *gin.Context) {
 		return
 	}
 	id, _ := strconv.ParseUint(ctx.Param("id"), 10, 64)
-	currentUser := ctx.MustGet(consts.ContextUserInfoKey).(*model.AdminUser)
+	currentUser := utils.GetCurrentAdminUser(ctx)
 
 	if err := c.service.OnlyRootAdminUser(uint(id), currentUser.ID); err != nil {
 		ctx.JSON(resp.ParamErr(err.Error()))
@@ -220,7 +221,7 @@ func (c *AdminUserController) UpdateRole(ctx *gin.Context) {
 //	@Success	200	{object}	resp.Result{data=model.AdminUser}	"用户详情"
 //	@Router		/api/admin/user/current [get]
 func (c *AdminUserController) CurrentInfo(ctx *gin.Context) {
-	user := ctx.MustGet(consts.ContextUserInfoKey).(*model.AdminUser)
+	user := utils.GetCurrentAdminUser(ctx)
 	ctx.JSON(resp.Succ(user))
 }
 
@@ -230,11 +231,11 @@ func (c *AdminUserController) CurrentInfo(ctx *gin.Context) {
 //	@Tags		管理后台-通用接口
 //	@Accept		json
 //	@Produce	json
-//	@Param		file	formData		file	true	"文件"
-//	@Success	200	{object}	resp.Result{data=string}	"文件地址"
+//	@Param		file	formData	file						true	"文件"
+//	@Success	200		{object}	resp.Result{data=string}	"文件地址"
 //	@Router		/api/admin/user/upload [post]
 func (c *AdminUserController) Upload(ctx *gin.Context) {
-	user := ctx.MustGet(consts.ContextUserInfoKey).(*model.AdminUser)
+	user := utils.GetCurrentAdminUser(ctx)
 	file, errF := ctx.FormFile("file")
 	if errF != nil {
 		ctx.JSON(resp.ParseErr(errF))

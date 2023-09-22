@@ -9,6 +9,7 @@ import (
 	"server/lib/errs"
 	"server/types"
 	"server/utils"
+	"strconv"
 	"strings"
 )
 
@@ -33,6 +34,10 @@ func (s *AdminUserService) FindList(query FindAdminUserListOption) (utils.ListRe
 	).Or(
 		u.Name.Like("%" + query.Keyword + "%"),
 	)
+
+	if id, err := strconv.ParseUint(query.Keyword, 10, 64); err == nil {
+		q = q.Or(u.ID.Eq(uint(id)))
+	}
 
 	if query.OrderKey != "" {
 		col, _ := u.GetFieldByName(query.OrderKey)

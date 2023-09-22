@@ -77,6 +77,25 @@ definitions:
     - type
     - value
     type: object
+  api.CreateNewsBodyDto:
+    properties:
+      content:
+        type: string
+      cover:
+        type: string
+      desc:
+        type: string
+      push_date:
+        description: 发布日期 YYYY-MM-DD HH:mm:ss
+        type: string
+      recommend:
+        description: 推荐等级 0 为不推荐，数值越大越靠前
+        type: integer
+      title:
+        type: string
+    required:
+    - title
+    type: object
   api.ResetPasswordAdminUserBodyDto:
     properties:
       password:
@@ -139,6 +158,29 @@ definitions:
         - 1
     required:
     - status
+    type: object
+  api.UpdateNewsBodyDto:
+    properties:
+      content:
+        type: string
+      cover:
+        type: string
+      desc:
+        type: string
+      id:
+        description: 角色 ID
+        type: integer
+      push_date:
+        description: 发布日期 YYYY-MM-DD HH:mm:ss
+        type: string
+      recommend:
+        description: 推荐等级 0 为不推荐，数值越大越靠前
+        type: integer
+      title:
+        type: string
+    required:
+    - id
+    - title
     type: object
   api.adminInitRootUserBodyDto:
     properties:
@@ -308,6 +350,10 @@ definitions:
         type: boolean
       name:
         type: string
+      news:
+        items:
+          $ref: '#/definitions/model.News'
+        type: array
       roles:
         items:
           $ref: '#/definitions/model.AdminRole'
@@ -317,6 +363,33 @@ definitions:
       updated_at:
         type: string
       username:
+        type: string
+    type: object
+  model.News:
+    properties:
+      author_id:
+        description: 作者
+        type: integer
+      content:
+        type: string
+      cover:
+        description: 封面
+        type: string
+      created_at:
+        type: string
+      desc:
+        type: string
+      id:
+        type: integer
+      push_date:
+        description: 发布日期
+        type: string
+      recommend:
+        description: 推荐等级
+        type: integer
+      title:
+        type: string
+      updated_at:
         type: string
     type: object
   permission.LabelType:
@@ -418,6 +491,142 @@ paths:
       summary: 用户登录
       tags:
       - 管理后台-用户认证
+  /api/admin/news:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 1
+        description: 当前页
+        in: query
+        name: current
+        type: number
+      - default: 20
+        description: 每页条数
+        in: query
+        name: page_size
+        type: number
+      - description: 需要排序的列
+        in: query
+        name: order_key
+        type: string
+      - description: 排序方式
+        enum:
+        - ase
+        - desc
+        in: query
+        name: order_type
+        type: string
+      - description: 按名称或ID搜索
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/resp.RList'
+                  - properties:
+                      list:
+                        items:
+                          $ref: '#/definitions/model.News'
+                        type: array
+                    type: object
+              type: object
+      summary: 新闻列表
+      tags:
+      - 管理后台-新闻
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Body
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateNewsBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            $ref: '#/definitions/resp.Result'
+      summary: 新增新闻
+      tags:
+      - 管理后台-新闻
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Body
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateNewsBodyDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            $ref: '#/definitions/resp.Result'
+      summary: 修改新闻
+      tags:
+      - 管理后台-新闻
+  /api/admin/news/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            $ref: '#/definitions/resp.Result'
+      summary: 删除新闻
+      tags:
+      - 管理后台-新闻
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: resp
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.Result'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.News'
+              type: object
+      summary: 新闻详情
+      tags:
+      - 管理后台-新闻
   /api/admin/role:
     get:
       consumes:
